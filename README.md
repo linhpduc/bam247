@@ -22,6 +22,7 @@ $ flutter run
 ### Useful commands
 
 * `flutter analyze`: statically analyzes Dart code to check for errors, warnings, and lints.
-* `flutter test`: run unit tests
-* `flutter install`: install app on an attached device
-* `flutter logs`: show log output for running app
+* `flutter test`: run unit tests.
+* `flutter install`: install app on an attached device.
+* `flutter logs`: show log output for running app.
+* `flutter pub add <package-name>`: install and add a new package.
