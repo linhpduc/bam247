@@ -1,20 +1,22 @@
-// Copyright 2021 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 const Widget divider = SizedBox(height: 10);
 
-// If screen content width is greater or equal to this value, the light and dark
-// color schemes will be displayed in a column. Otherwise, they will
-// be displayed in a row.
-const double narrowScreenWidthThreshold = 400;
+enum DatasourceType {
+  attendance_machine,
+}
 
-class ColorPalettesScreen extends StatelessWidget {
-  const ColorPalettesScreen({super.key});
+class Datasource {
+  Datasource(this.source_type, this.source_provider, this.display_name, this.endpoint);
+
+  final String source_type;
+  final String source_provider;
+  final String display_name;
+  final String endpoint;
+}
+
+class DatasourceScreen extends StatelessWidget {
+  const DatasourceScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,84 +49,21 @@ class ColorPalettesScreen extends StatelessWidget {
       );
     }
 
-    Widget dynamicColorNotice() => RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: Theme.of(context).textTheme.bodySmall,
-            children: [
-              const TextSpan(
-                text: 'To create color schemes based on a '
-                    'platform\'s implementation of dynamic color, '
-                    'use the ',
-              ),
-              TextSpan(
-                text: 'dynamic_color',
-                style: const TextStyle(decoration: TextDecoration.underline),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () async {
-                    final url = Uri.parse(
-                      'https://pub.dev/packages/dynamic_color',
-                    );
-                    if (!await launchUrl(url)) {
-                      throw Exception('Could not launch $url');
-                    }
-                  },
-              ),
-              const TextSpan(text: ' package.'),
-            ],
-          ),
-        );
-
     return Expanded(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth < narrowScreenWidthThreshold) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  dynamicColorNotice(),
-                  divider,
-                  schemeLabel('Light ColorScheme'),
-                  schemeView(lightTheme),
-                  divider,
-                  divider,
-                  schemeLabel('Dark ColorScheme'),
-                  schemeView(darkTheme),
-                ],
-              ),
-            );
-          } else {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: Column(
-                  children: [
-                    dynamicColorNotice(),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              schemeLabel('Light ColorScheme'),
-                              schemeView(lightTheme),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              schemeLabel('Dark ColorScheme'),
-                              schemeView(darkTheme),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                schemeLabel('Light ColorScheme'),
+                schemeView(lightTheme),
+                divider,
+                divider,
+                schemeLabel('Dark ColorScheme'),
+                schemeView(darkTheme),
+              ],
+            ),
+          );
         },
       ),
     );
@@ -457,3 +396,12 @@ class ColorChip extends StatelessWidget {
     );
   }
 }
+
+
+List<Datasource> _datasources = [
+  Datasource("attendance_machine", "ZKTeco", "Van phong HN", "192.168.3.101:4370"),
+  Datasource("attendance_machine", "Ronald Jack", "Van phong HCM", "192.168.4.101:4370"),
+  Datasource("attendance_machine", "Ronald Jack", "Van phong DN", "192.168.5.101:4370"),
+  Datasource("attendance_machine", "Ronald Jack", "Van phong HP", "192.168.6.101:4370"),
+  Datasource("attendance_machine", "ZKTeco", "Van phong QN", "192.168.7.101:4370"),
+];

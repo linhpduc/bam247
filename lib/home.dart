@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'color_palettes_screen.dart';
+import 'datasources_screen.dart';
 import 'component_screen.dart';
 import 'constants.dart';
 import 'elevation_screen.dart';
@@ -112,7 +112,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ),
             ),
           ),
-        ScreenSelected.sources => const ColorPalettesScreen(),
+        ScreenSelected.sources => const DatasourceScreen(),
         ScreenSelected.records => const TypographyScreen(),
         ScreenSelected.helps => const ElevationScreen()
       };
