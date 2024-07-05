@@ -1064,27 +1064,27 @@ class _ProgressIndicatorsState extends State<ProgressIndicators> {
 const List<NavigationDestination> appBarDestinations = [
   NavigationDestination(
     tooltip: '',
-    icon: Icon(Icons.widgets_outlined),
-    label: 'Components',
-    selectedIcon: Icon(Icons.widgets),
+    icon: Icon(Icons.home_outlined),
+    label: 'Home',
+    selectedIcon: Icon(Icons.home),
   ),
   NavigationDestination(
     tooltip: '',
-    icon: Icon(Icons.format_paint_outlined),
-    label: 'Color',
-    selectedIcon: Icon(Icons.format_paint),
+    icon: Icon(Icons.dataset_outlined),
+    label: 'Sources',
+    selectedIcon: Icon(Icons.dataset),
   ),
   NavigationDestination(
     tooltip: '',
-    icon: Icon(Icons.text_snippet_outlined),
-    label: 'Typography',
-    selectedIcon: Icon(Icons.text_snippet),
+    icon: Icon(Icons.checklist_rtl_outlined),
+    label: 'Records',
+    selectedIcon: Icon(Icons.checklist_rtl),
   ),
   NavigationDestination(
     tooltip: '',
-    icon: Icon(Icons.invert_colors_on_outlined),
-    label: 'Elevation',
-    selectedIcon: Icon(Icons.opacity),
+    icon: Icon(Icons.info_outline),
+    label: 'FAQ',
+    selectedIcon: Icon(Icons.info),
   )
 ];
 

@@ -1,7 +1,3 @@
-// Copyright 2021 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:flutter/material.dart';
 
 import 'color_palettes_screen.dart';
@@ -17,19 +13,15 @@ class Home extends StatefulWidget {
     required this.colorSelected,
     required this.handleBrightnessChange,
     required this.handleColorSelect,
-    required this.handleImageSelect,
     required this.colorSelectionMethod,
-    required this.imageSelected,
   });
 
   final bool useLightMode;
   final ColorSeed colorSelected;
-  final ColorImageProvider imageSelected;
   final ColorSelectionMethod colorSelectionMethod;
 
   final void Function(bool useLightMode) handleBrightnessChange;
   final void Function(int value) handleColorSelect;
-  final void Function(int value) handleImageSelect;
 
   @override
   State<Home> createState() => _HomeState();
@@ -43,7 +35,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   bool showMediumSizeLayout = false;
   bool showLargeSizeLayout = false;
 
-  int screenIndex = ScreenSelected.component.value;
+  int screenIndex = ScreenSelected.home.value;
 
   @override
   initState() {
@@ -108,7 +100,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     bool showNavBarExample,
   ) =>
       switch (screenSelected) {
-        ScreenSelected.component => Expanded(
+        ScreenSelected.home => Expanded(
             child: OneTwoTransition(
               animation: railAnimation,
               one: FirstComponentList(
@@ -120,14 +112,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ),
             ),
           ),
-        ScreenSelected.color => const ColorPalettesScreen(),
-        ScreenSelected.typography => const TypographyScreen(),
-        ScreenSelected.elevation => const ElevationScreen()
+        ScreenSelected.sources => const ColorPalettesScreen(),
+        ScreenSelected.records => const TypographyScreen(),
+        ScreenSelected.helps => const ElevationScreen()
       };
 
   PreferredSizeWidget createAppBar() {
     return AppBar(
-      title: const Text('Material 3'),
+      title: const Text('Base Checkin Client'),
       actions: !showMediumSizeLayout && !showLargeSizeLayout
           ? [
               _BrightnessButton(
@@ -138,11 +130,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 colorSelected: widget.colorSelected,
                 colorSelectionMethod: widget.colorSelectionMethod,
               ),
-              _ColorImageButton(
-                handleImageSelect: widget.handleImageSelect,
-                imageSelected: widget.imageSelected,
-                colorSelectionMethod: widget.colorSelectionMethod,
-              )
             ]
           : [Container()],
     );
@@ -161,13 +148,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             child: _ColorSeedButton(
               handleColorSelect: widget.handleColorSelect,
               colorSelected: widget.colorSelected,
-              colorSelectionMethod: widget.colorSelectionMethod,
-            ),
-          ),
-          Flexible(
-            child: _ColorImageButton(
-              handleImageSelect: widget.handleImageSelect,
-              imageSelected: widget.imageSelected,
               colorSelectionMethod: widget.colorSelectionMethod,
             ),
           ),
@@ -204,10 +184,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         useLightMode: widget.useLightMode,
                         handleBrightnessChange: widget.handleBrightnessChange,
                         useMaterial3: true,
-                        handleImageSelect: widget.handleImageSelect,
                         handleColorSelect: widget.handleColorSelect,
                         colorSelectionMethod: widget.colorSelectionMethod,
-                        imageSelected: widget.imageSelected,
                         colorSelected: widget.colorSelected,
                       )
                     : _trailingActions(),
@@ -244,7 +222,7 @@ class _BrightnessButton extends StatelessWidget {
     final isBright = Theme.of(context).brightness == Brightness.light;
     return Tooltip(
       preferBelow: showTooltipBelow,
-      message: 'Toggle brightness',
+      message: 'Toggle darkmode',
       child: IconButton(
         icon: isBright
             ? const Icon(Icons.dark_mode_outlined)
@@ -272,7 +250,7 @@ class _ColorSeedButton extends StatelessWidget {
       icon: const Icon(
         Icons.palette_outlined,
       ),
-      tooltip: 'Select a seed color',
+      tooltip: 'Select theme color',
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       itemBuilder: (context) {
         return List.generate(ColorSeed.values.length, (index) {
@@ -308,85 +286,22 @@ class _ColorSeedButton extends StatelessWidget {
   }
 }
 
-class _ColorImageButton extends StatelessWidget {
-  const _ColorImageButton({
-    required this.handleImageSelect,
-    required this.imageSelected,
-    required this.colorSelectionMethod,
-  });
-
-  final void Function(int) handleImageSelect;
-  final ColorImageProvider imageSelected;
-  final ColorSelectionMethod colorSelectionMethod;
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton(
-      icon: const Icon(
-        Icons.image_outlined,
-      ),
-      tooltip: 'Select a color extraction image',
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      itemBuilder: (context) {
-        return List.generate(ColorImageProvider.values.length, (index) {
-          final currentImageProvider = ColorImageProvider.values[index];
-
-          return PopupMenuItem(
-            value: index,
-            enabled: currentImageProvider != imageSelected ||
-                colorSelectionMethod != ColorSelectionMethod.image,
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 48),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image(
-                          image: NetworkImage(currentImageProvider.url),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Text(currentImageProvider.label),
-                ),
-              ],
-            ),
-          );
-        });
-      },
-      onSelected: handleImageSelect,
-    );
-  }
-}
-
 class _ExpandedTrailingActions extends StatelessWidget {
   const _ExpandedTrailingActions({
     required this.useLightMode,
     required this.handleBrightnessChange,
     required this.useMaterial3,
     required this.handleColorSelect,
-    required this.handleImageSelect,
-    required this.imageSelected,
     required this.colorSelected,
     required this.colorSelectionMethod,
   });
 
   final void Function(bool) handleBrightnessChange;
-  final void Function(int) handleImageSelect;
   final void Function(int) handleColorSelect;
 
   final bool useLightMode;
   final bool useMaterial3;
 
-  final ColorImageProvider imageSelected;
   final ColorSeed colorSelected;
   final ColorSelectionMethod colorSelectionMethod;
 
@@ -400,9 +315,10 @@ class _ExpandedTrailingActions extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const Divider(),
           Row(
             children: [
-              const Text('Brightness'),
+              const Text('Darkmode'),
               Expanded(child: Container()),
               Switch(
                   value: useLightMode,
@@ -411,16 +327,9 @@ class _ExpandedTrailingActions extends StatelessWidget {
                   })
             ],
           ),
-          const Divider(),
           _ExpandedColorSeedAction(
             handleColorSelect: handleColorSelect,
             colorSelected: colorSelected,
-            colorSelectionMethod: colorSelectionMethod,
-          ),
-          const Divider(),
-          _ExpandedImageColorAction(
-            handleImageSelect: handleImageSelect,
-            imageSelected: imageSelected,
             colorSelectionMethod: colorSelectionMethod,
           ),
         ],
@@ -461,60 +370,6 @@ class _ExpandedColorSeedAction extends StatelessWidget {
               handleColorSelect(i);
             },
             tooltip: ColorSeed.values[i].label,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ExpandedImageColorAction extends StatelessWidget {
-  const _ExpandedImageColorAction({
-    required this.handleImageSelect,
-    required this.imageSelected,
-    required this.colorSelectionMethod,
-  });
-
-  final void Function(int) handleImageSelect;
-  final ColorImageProvider imageSelected;
-  final ColorSelectionMethod colorSelectionMethod;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 150.0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: GridView.count(
-          crossAxisCount: 3,
-          children: List.generate(
-            ColorImageProvider.values.length,
-            (i) => Tooltip(
-              message: ColorImageProvider.values[i].name,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(4.0),
-                onTap: () => handleImageSelect(i),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(4.0),
-                    elevation: imageSelected == ColorImageProvider.values[i] &&
-                            colorSelectionMethod == ColorSelectionMethod.image
-                        ? 3
-                        : 0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4.0),
-                        child: Image(
-                          image: NetworkImage(ColorImageProvider.values[i].url),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ),
         ),
       ),
