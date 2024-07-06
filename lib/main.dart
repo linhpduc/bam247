@@ -1,9 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:launch_at_startup/launch_at_startup.dart';
 
 import 'constants.dart';
 import 'home.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  launchAtStartup.setup(
+    appName: 'Base Checkin Client',
+    appPath: Platform.resolvedExecutable,
+    packageName: 'vn.base.platform.checkinclient',
+  );
+
+  await launchAtStartup.enable();
+  
   runApp(const App());
 }
 
