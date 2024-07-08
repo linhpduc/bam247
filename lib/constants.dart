@@ -5,11 +5,6 @@ const double mediumWidthBreakpoint = 1000;
 const double largeWidthBreakpoint = 1500;
 const double transitionLength = 500;
 
-enum ColorSelectionMethod {
-  colorSeed,
-  image,
-}
-
 enum ColorSeed {
   baseColor('Base blue', Color(0xff007AF5)),
   green('Green', Color(0xff22BE70)),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 
 import 'constants.dart';
-import 'home.dart';
+import 'screens/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,9 +12,7 @@ void main() async {
     appPath: Platform.resolvedExecutable,
     packageName: 'vn.base.platform.checkinclient',
   );
-
   await launchAtStartup.enable();
-  
   runApp(const App());
 }
 
@@ -30,7 +28,6 @@ class _AppState extends State<App> {
   ThemeMode themeMode = ThemeMode.system;
   ColorSeed colorSelected = ColorSeed.baseColor;
   ColorScheme? imageColorScheme = const ColorScheme.light();
-  ColorSelectionMethod colorSelectionMethod = ColorSelectionMethod.colorSeed;
 
   bool get useLightMode => switch (themeMode) {
         ThemeMode.system => View.of(context).platformDispatcher.platformBrightness == Brightness.light,
@@ -46,7 +43,6 @@ class _AppState extends State<App> {
 
   void handleColorSelect(int value) {
     setState(() {
-      colorSelectionMethod = ColorSelectionMethod.colorSeed;
       colorSelected = ColorSeed.values[value];
     });
   }
@@ -58,13 +54,12 @@ class _AppState extends State<App> {
       title: 'Base Checkin Client',
       themeMode: themeMode,
       theme: ThemeData(
-        colorSchemeSeed: colorSelectionMethod == ColorSelectionMethod.colorSeed ? colorSelected.color : null,
-        colorScheme: colorSelectionMethod == ColorSelectionMethod.image ? imageColorScheme : null,
+        colorSchemeSeed: colorSelected.color,
         useMaterial3: true,
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: colorSelectionMethod == ColorSelectionMethod.colorSeed ? colorSelected.color : imageColorScheme!.primary,
+        colorSchemeSeed: colorSelected.color,
         useMaterial3: true,
         brightness: Brightness.dark,
       ),
@@ -73,7 +68,6 @@ class _AppState extends State<App> {
         colorSelected: colorSelected,
         handleBrightnessChange: handleBrightnessChange,
         handleColorSelect: handleColorSelect,
-        colorSelectionMethod: colorSelectionMethod,
       ),
     );
   }

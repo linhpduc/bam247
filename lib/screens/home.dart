@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'datasources_screen.dart';
-import 'component_screen.dart';
-import 'constants.dart';
-import 'elevation_screen.dart';
-import 'typography_screen.dart';
+import 'sources.dart';
+import '../component_screen.dart';
+import '../constants.dart';
+import '../elevation_screen.dart';
+import '../typography_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({
@@ -13,12 +13,10 @@ class Home extends StatefulWidget {
     required this.colorSelected,
     required this.handleBrightnessChange,
     required this.handleColorSelect,
-    required this.colorSelectionMethod,
   });
 
   final bool useLightMode;
   final ColorSeed colorSelected;
-  final ColorSelectionMethod colorSelectionMethod;
 
   final void Function(bool useLightMode) handleBrightnessChange;
   final void Function(int value) handleColorSelect;
@@ -128,7 +126,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               _ColorSeedButton(
                 handleColorSelect: widget.handleColorSelect,
                 colorSelected: widget.colorSelected,
-                colorSelectionMethod: widget.colorSelectionMethod,
               ),
             ]
           : [Container()],
@@ -148,7 +145,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             child: _ColorSeedButton(
               handleColorSelect: widget.handleColorSelect,
               colorSelected: widget.colorSelected,
-              colorSelectionMethod: widget.colorSelectionMethod,
             ),
           ),
         ],
@@ -163,7 +159,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           scaffoldKey: scaffoldKey,
           animationController: controller,
           railAnimation: railAnimation,
-          appBar: createAppBar(),
+          // appBar: createAppBar(),
           body: createScreenFor(
               ScreenSelected.values[screenIndex], controller.value == 1),
           navigationRail: NavigationRail(
@@ -185,7 +181,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         handleBrightnessChange: widget.handleBrightnessChange,
                         useMaterial3: true,
                         handleColorSelect: widget.handleColorSelect,
-                        colorSelectionMethod: widget.colorSelectionMethod,
                         colorSelected: widget.colorSelected,
                       )
                     : _trailingActions(),
@@ -237,12 +232,10 @@ class _ColorSeedButton extends StatelessWidget {
   const _ColorSeedButton({
     required this.handleColorSelect,
     required this.colorSelected,
-    required this.colorSelectionMethod,
   });
 
   final void Function(int) handleColorSelect;
   final ColorSeed colorSelected;
-  final ColorSelectionMethod colorSelectionMethod;
 
   @override
   Widget build(BuildContext context) {
@@ -258,15 +251,13 @@ class _ColorSeedButton extends StatelessWidget {
 
           return PopupMenuItem(
             value: index,
-            enabled: currentColor != colorSelected ||
-                colorSelectionMethod != ColorSelectionMethod.colorSeed,
+            enabled: currentColor != colorSelected,
             child: Wrap(
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 10),
                   child: Icon(
-                    currentColor == colorSelected &&
-                            colorSelectionMethod != ColorSelectionMethod.image
+                    currentColor == colorSelected
                         ? Icons.color_lens
                         : Icons.color_lens_outlined,
                     color: currentColor.color,
@@ -293,7 +284,6 @@ class _ExpandedTrailingActions extends StatelessWidget {
     required this.useMaterial3,
     required this.handleColorSelect,
     required this.colorSelected,
-    required this.colorSelectionMethod,
   });
 
   final void Function(bool) handleBrightnessChange;
@@ -303,7 +293,6 @@ class _ExpandedTrailingActions extends StatelessWidget {
   final bool useMaterial3;
 
   final ColorSeed colorSelected;
-  final ColorSelectionMethod colorSelectionMethod;
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +319,6 @@ class _ExpandedTrailingActions extends StatelessWidget {
           _ExpandedColorSeedAction(
             handleColorSelect: handleColorSelect,
             colorSelected: colorSelected,
-            colorSelectionMethod: colorSelectionMethod,
           ),
         ],
       ),
@@ -345,12 +333,10 @@ class _ExpandedColorSeedAction extends StatelessWidget {
   const _ExpandedColorSeedAction({
     required this.handleColorSelect,
     required this.colorSelected,
-    required this.colorSelectionMethod,
   });
 
   final void Function(int) handleColorSelect;
   final ColorSeed colorSelected;
-  final ColorSelectionMethod colorSelectionMethod;
 
   @override
   Widget build(BuildContext context) {
@@ -363,8 +349,7 @@ class _ExpandedColorSeedAction extends StatelessWidget {
           (i) => IconButton(
             icon: const Icon(Icons.radio_button_unchecked),
             color: ColorSeed.values[i].color,
-            isSelected: colorSelected.color == ColorSeed.values[i].color &&
-                colorSelectionMethod == ColorSelectionMethod.colorSeed,
+            isSelected: colorSelected.color == ColorSeed.values[i].color,
             selectedIcon: const Icon(Icons.circle),
             onPressed: () {
               handleColorSelect(i);
@@ -385,7 +370,7 @@ class NavigationTransition extends StatefulWidget {
       required this.railAnimation,
       required this.navigationRail,
       required this.navigationBar,
-      required this.appBar,
+      // required this.appBar,
       required this.body});
 
   final GlobalKey<ScaffoldState> scaffoldKey;
@@ -393,7 +378,7 @@ class NavigationTransition extends StatefulWidget {
   final CurvedAnimation railAnimation;
   final Widget navigationRail;
   final Widget navigationBar;
-  final PreferredSizeWidget appBar;
+  // final PreferredSizeWidget appBar;
   final Widget body;
 
   @override
@@ -428,7 +413,7 @@ class _NavigationTransitionState extends State<NavigationTransition> {
 
     return Scaffold(
       key: widget.scaffoldKey,
-      appBar: widget.appBar,
+      // appBar: widget.appBar,
       body: Row(
         children: <Widget>[
           RailTransition(
