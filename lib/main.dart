@@ -1,18 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:launch_at_startup/launch_at_startup.dart';
 
 import 'constants.dart';
 import 'screens/home.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  launchAtStartup.setup(
-    appName: 'Base Checkin Client',
-    appPath: Platform.resolvedExecutable,
-    packageName: 'vn.base.platform.checkinclient',
-  );
-  await launchAtStartup.enable();
   runApp(const App());
 }
 
@@ -27,13 +18,12 @@ class _AppState extends State<App> {
   bool useMaterial3 = true;
   ThemeMode themeMode = ThemeMode.system;
   ColorSeed colorSelected = ColorSeed.baseColor;
-  ColorScheme? imageColorScheme = const ColorScheme.light();
 
   bool get useLightMode => switch (themeMode) {
-        ThemeMode.system => View.of(context).platformDispatcher.platformBrightness == Brightness.light,
-        ThemeMode.light => true,
-        ThemeMode.dark => false
-      };
+    ThemeMode.system => View.of(context).platformDispatcher.platformBrightness == Brightness.light,
+    ThemeMode.light => true,
+    ThemeMode.dark => false
+  };
 
   void handleBrightnessChange(bool useLightMode) {
     setState(() {
@@ -51,17 +41,17 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Base Checkin Client',
+      title: 'Batt247',
       themeMode: themeMode,
       theme: ThemeData(
-        colorSchemeSeed: colorSelected.color,
-        useMaterial3: true,
         brightness: Brightness.light,
+        useMaterial3: true,
+        colorSchemeSeed: colorSelected.color,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: colorSelected.color,
-        useMaterial3: true,
         brightness: Brightness.dark,
+        useMaterial3: true,
+        colorSchemeSeed: colorSelected.color,
       ),
       home: Home(
         useLightMode: useLightMode,

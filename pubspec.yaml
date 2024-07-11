@@ -1,5 +1,5 @@
-name: bcc24
-description: "A brandnew client to collect the attendance records for Base Checkin application."
+name: batt247
+description: "A client to collect the attendance records for Base Checkin application."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 environment:

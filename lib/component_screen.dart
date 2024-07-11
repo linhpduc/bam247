@@ -223,11 +223,6 @@ class Communication extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const ComponentGroupDecoration(label: 'Communication', children: [
-      NavigationBars(
-        selectedIndex: 1,
-        isExampleBar: true,
-        isBadgeExample: true,
-      ),
       ProgressIndicators(),
       SnackBarSection(),
     ]);
@@ -255,17 +250,12 @@ class Navigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ComponentGroupDecoration(label: 'Navigation', children: [
-      const BottomAppBars(),
-      const NavigationBars(
-        selectedIndex: 0,
-        isExampleBar: true,
-      ),
-      NavigationDrawers(scaffoldKey: scaffoldKey),
-      const NavigationRails(),
-      const Tabs(),
-      const SearchAnchors(),
-      const TopAppBars(),
+    return const ComponentGroupDecoration(label: 'Navigation', children: [
+      BottomAppBars(),
+      NavigationRails(),
+      Tabs(),
+      SearchAnchors(),
+      TopAppBars(),
     ]);
   }
 }
@@ -1059,32 +1049,6 @@ class _ProgressIndicatorsState extends State<ProgressIndicators> {
   }
 }
 
-const List<NavigationDestination> appBarDestinations = [
-  NavigationDestination(
-    tooltip: '',
-    icon: Icon(Icons.home_outlined),
-    label: 'Home',
-    selectedIcon: Icon(Icons.home),
-  ),
-  NavigationDestination(
-    tooltip: '',
-    icon: Icon(Icons.dataset_outlined),
-    label: 'Sources',
-    selectedIcon: Icon(Icons.dataset),
-  ),
-  NavigationDestination(
-    tooltip: '',
-    icon: Icon(Icons.checklist_rtl_outlined),
-    label: 'Records',
-    selectedIcon: Icon(Icons.checklist_rtl),
-  ),
-  NavigationDestination(
-    tooltip: '',
-    icon: Icon(Icons.info_outline),
-    label: 'FAQ',
-    selectedIcon: Icon(Icons.info),
-  )
-];
 
 const List<Widget> exampleBarDestinations = [
   NavigationDestination(
@@ -1133,78 +1097,6 @@ List<Widget> barWithBadgeDestinations = [
     selectedIcon: Badge.count(count: 3, child: const Icon(Icons.videocam)),
   )
 ];
-
-class NavigationBars extends StatefulWidget {
-  const NavigationBars({
-    super.key,
-    this.onSelectItem,
-    required this.selectedIndex,
-    required this.isExampleBar,
-    this.isBadgeExample = false,
-  });
-
-  final void Function(int)? onSelectItem;
-  final int selectedIndex;
-  final bool isExampleBar;
-  final bool isBadgeExample;
-
-  @override
-  State<NavigationBars> createState() => _NavigationBarsState();
-}
-
-class _NavigationBarsState extends State<NavigationBars> {
-  late int selectedIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedIndex = widget.selectedIndex;
-  }
-
-  @override
-  void didUpdateWidget(covariant NavigationBars oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selectedIndex != oldWidget.selectedIndex) {
-      selectedIndex = widget.selectedIndex;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // App NavigationBar should get first focus.
-    Widget navigationBar = Focus(
-      autofocus: !(widget.isExampleBar || widget.isBadgeExample),
-      child: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-          if (!widget.isExampleBar) widget.onSelectItem!(index);
-        },
-        destinations: widget.isExampleBar && widget.isBadgeExample
-            ? barWithBadgeDestinations
-            : widget.isExampleBar
-                ? exampleBarDestinations
-                : appBarDestinations,
-      ),
-    );
-
-    if (widget.isExampleBar && widget.isBadgeExample) {
-      navigationBar = ComponentDecoration(
-          label: 'Badges',
-          tooltipMessage: 'Use Badge or Badge.count',
-          child: navigationBar);
-    } else if (widget.isExampleBar) {
-      navigationBar = ComponentDecoration(
-          label: 'Navigation bar',
-          tooltipMessage: 'Use NavigationBar',
-          child: navigationBar);
-    }
-
-    return navigationBar;
-  }
-}
 
 class IconToggleButtons extends StatefulWidget {
   const IconToggleButtons({super.key});
@@ -1877,89 +1769,6 @@ class ButtonAnchorExample extends StatelessWidget {
           onPressed: () {},
           child: const Text('Item 3'),
         ),
-      ],
-    );
-  }
-}
-
-class NavigationDrawers extends StatelessWidget {
-  const NavigationDrawers({super.key, required this.scaffoldKey});
-  final GlobalKey<ScaffoldState> scaffoldKey;
-
-  @override
-  Widget build(BuildContext context) {
-    return ComponentDecoration(
-      label: 'Navigation drawer',
-      tooltipMessage:
-          'Use NavigationDrawer. For modal navigation drawers, see Scaffold.endDrawer',
-      child: Column(
-        children: [
-          const SizedBox(height: 520, child: NavigationDrawerSection()),
-          colDivider,
-          colDivider,
-          TextButton(
-            child: const Text('Show modal navigation drawer',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            onPressed: () {
-              scaffoldKey.currentState!.openEndDrawer();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class NavigationDrawerSection extends StatefulWidget {
-  const NavigationDrawerSection({super.key});
-
-  @override
-  State<NavigationDrawerSection> createState() =>
-      _NavigationDrawerSectionState();
-}
-
-class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
-  int navDrawerIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigationDrawer(
-      onDestinationSelected: (selectedIndex) {
-        setState(() {
-          navDrawerIndex = selectedIndex;
-        });
-      },
-      selectedIndex: navDrawerIndex,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
-          child: Text(
-            'Mail',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
-        ...destinations.map((destination) {
-          return NavigationDrawerDestination(
-            label: Text(destination.label),
-            icon: destination.icon,
-            selectedIcon: destination.selectedIcon,
-          );
-        }),
-        const Divider(indent: 28, endIndent: 28),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
-          child: Text(
-            'Labels',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
-        ...labelDestinations.map((destination) {
-          return NavigationDrawerDestination(
-            label: Text(destination.label),
-            icon: destination.icon,
-            selectedIcon: destination.selectedIcon,
-          );
-        }),
       ],
     );
   }

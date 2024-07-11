@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 const double narrowScreenWidthThreshold = 450;
-const double mediumWidthBreakpoint = 1000;
-const double largeWidthBreakpoint = 1500;
+const double mediumWidthBreakpoint = 768;
+const double largeWidthBreakpoint = 1280;
 const double transitionLength = 500;
 
 enum ColorSeed {
