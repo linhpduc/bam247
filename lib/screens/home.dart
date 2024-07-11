@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'sources.dart';
+import 'faq.dart';
+import 'records.dart';
 import '../components.dart';
 import '../constants.dart';
-import '../elevation_screen.dart';
-import '../typography_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({
@@ -29,8 +29,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   late final AnimationController controller;
   late final CurvedAnimation railAnimation;
-  bool controllerInitialized = false;
-  bool showLargeSizeLayout = false;
+  bool controllerInitialized = true;
+  bool showLargeSizeLayout = true;
   int screenIndex = ScreenSelected.home.value;
 
   @override
@@ -82,13 +82,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget createScreenFor(ScreenSelected screenSelected,) => switch (screenSelected) {
     ScreenSelected.home => const Expanded(
-      child: Center(
-        child: Text("Home screen"),
-      ),
+      child: HomeScreen(),
     ),
     ScreenSelected.sources => const DatasourceScreen(),
-    ScreenSelected.records => const TypographyScreen(),
-    ScreenSelected.helps => const ElevationScreen(),
+    ScreenSelected.records => const RecordScreen(),
+    ScreenSelected.helps => const FaqScreen(),
   };
 
   Widget _trailingActions() => Column(
@@ -158,6 +156,37 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ),
         );
       },
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: Card(
+              color: Theme.of(context).colorScheme.onSecondary,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Home screen', style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
