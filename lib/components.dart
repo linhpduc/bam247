@@ -339,3 +339,6 @@ class _ExpandedColorSeedAction extends StatelessWidget {
   }
 }
 // End display settings
+
+
+const Widget divider = SizedBox(height: 20);
