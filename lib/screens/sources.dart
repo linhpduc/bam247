@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/sources.dart';
+import '../utils/database.dart';
 
 class DatasourceScreen extends StatefulWidget {
   const DatasourceScreen({super.key});
@@ -68,13 +69,24 @@ class LogSourceDT extends StatefulWidget {
 }
 
 class _LogSourceDTState extends State<LogSourceDT> {
+  Batt247Database db = Batt247Database.instance;
   List<Sources>? filterSources;
   int _pageSize = 10;
 
   @override
   void initState() {
-    filterSources = mySources;
+    db.getAllSource().then((values) {
+      setState(() {
+        filterSources = values;
+      });
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    db.close();
+    super.dispose();
   }
 
   @override

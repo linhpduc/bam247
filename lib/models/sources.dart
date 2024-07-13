@@ -42,6 +42,20 @@ class Sources {
     "created_time": createdTime?.toUtc().millisecondsSinceEpoch ?? DateTime.now().toUtc().millisecondsSinceEpoch,
   };
 
+  factory Sources.fromMap(Map<String, dynamic> map) => Sources(
+    id: map["id"],
+    sourceId: map["source_id"],
+    name: map["description"],
+    description: map["description"],
+    type: typeSample,
+    intervalInSeconds: map["interval_in_seconds"],
+    realtimeEnabled: map["realtime_enabled"],
+    clientEndpoint: map["client_endpoint"],
+    clientId: map["client_id"],
+    clientSecret: map["client_secret"],
+    createdTime: DateTime.fromMillisecondsSinceEpoch(map["created_time"], isUtc: true),
+  );
+
   Sources copy({
   int? id,
   String? sourceId,
