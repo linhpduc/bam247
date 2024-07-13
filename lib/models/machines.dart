@@ -8,6 +8,7 @@ class Machines {
   final int tcpPort;
   final bool? realtimeCapturable;
   final String? metadata;
+  static String tableName = 'machines';
 
   Machines({
     required this.id,

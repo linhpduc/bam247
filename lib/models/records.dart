@@ -9,6 +9,7 @@ class Records {
   final DateTime attendanceTime;
   final DateTime? createdTime;
   final DateTime? syncedTime;
+  static String tableName = 'records';
 
   Records({
     required this.id,
