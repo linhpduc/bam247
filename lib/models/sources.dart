@@ -1,7 +1,8 @@
 import 'source_types.dart';
 
 class Sources {
-  final String id;
+  final int id;
+  final String sourceId;
   final String name;
   final String? description;
   final SourceTypes type;
@@ -11,9 +12,11 @@ class Sources {
   final String clientId;
   final String clientSecret;
   final DateTime? createdTime;
+  static String tableName = 'sources';
 
   Sources({
     required this.id, 
+    required this.sourceId,
     required this.name, 
     this.description, 
     required this.type, 
@@ -27,21 +30,56 @@ class Sources {
 
   Map<String, dynamic> toMap() => {
     "id": id,
+    "source_id": sourceId,
     "name": name,
+    "description": description ?? "",
     "type": type.name,
+    "interval_in_seconds": intervalInSeconds ?? 600,
+    "realtime_enabled": realtimeEnabled ?? 0,
+    "client_endpoint": clientEndpoint,
+    "client_id": clientId,
+    "client_secret": clientSecret,
+    "created_time": createdTime?.toUtc().millisecondsSinceEpoch ?? DateTime.now().toUtc().millisecondsSinceEpoch,
   };
+
+  Sources copy({
+  int? id,
+  String? sourceId,
+  String? name,
+  String? description,
+  SourceTypes? type,
+  int? intervalInSeconds,
+  bool? realtimeEnabled,
+  String? clientEndpoint,
+  String? clientId,
+  String? clientSecret,
+  DateTime? createdTime,
+  }) => Sources(
+    id: id ?? this.id,
+    sourceId: sourceId ?? this.sourceId,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    type: type ?? this.type,
+    intervalInSeconds: intervalInSeconds ?? this.intervalInSeconds,
+    realtimeEnabled: realtimeEnabled ?? this.realtimeEnabled,
+    clientEndpoint: clientEndpoint ?? this.clientEndpoint,
+    clientId: clientId ?? this.clientId,
+    clientSecret: clientSecret ?? this.clientSecret,
+    createdTime: createdTime ?? this.createdTime,
+    );
 
   @override
   String toString() {
-    return 'Sources{id: $id, name: $name, type: $type}';
+    return 'Sources{source_id: $sourceId, name: $name, type: $type}';
   }
 }
 
 Sources s1 = Sources(
-      id: "a46058eb9418",
+      id: 1,
+      sourceId: "s_a46058eb9418",
       name: "Văn phòng HN",
       description: "",
-      type: machine,
+      type: typeSample,
       intervalInSeconds: 600,
       realtimeEnabled: false,
       clientEndpoint: "https://checkin.base.vn",
@@ -49,10 +87,11 @@ Sources s1 = Sources(
       clientSecret: "0",
       createdTime: DateTime(2017, 9, 7, 17, 30));
 Sources s2 = Sources(
-      id: "84fc085cf219",
+      id: 2,
+      sourceId: "s_84fc085cf219",
       name: "Văn phòng HN",
       description: "",
-      type: machine,
+      type: typeSample,
       intervalInSeconds: 600,
       realtimeEnabled: false,
       clientEndpoint: "https://checkin.base.vn",
@@ -60,10 +99,11 @@ Sources s2 = Sources(
       clientSecret: "0",
       createdTime: DateTime(2017, 9, 7, 17, 30));
 Sources s3 = Sources(
-      id: "c4229d8e5f74",
+      id: 3,
+      sourceId: "s_c4229d8e5f74",
       name: "Văn phòng HN",
       description: "",
-      type: machine,
+      type: typeSample,
       intervalInSeconds: 600,
       realtimeEnabled: false,
       clientEndpoint: "https://checkin.base.vn",

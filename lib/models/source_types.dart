@@ -1,10 +1,13 @@
 class SourceTypes {
+  final int id;
   final String code;
   final String name;
+  static String tableName = 'source_types';
 
-  SourceTypes({required this.code, required this.name});
+  SourceTypes({required this.id, required this.code, required this.name});
 
   Map<String, dynamic> toMap() => {
+    "id": id,
     "code": code,
     "name": name,
   };
@@ -15,4 +18,4 @@ class SourceTypes {
   }
 }
 
-SourceTypes machine = SourceTypes(code: "machine", name: "Attendance Machine");
+SourceTypes typeSample = SourceTypes(id: 1, code: "machine", name: "Attendance Machine");

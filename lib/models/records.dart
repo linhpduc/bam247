@@ -1,7 +1,8 @@
 import 'sources.dart';
 
 class Records {
-  final String id;
+  final int id;
+  final String recordId;
   final Sources source;
   final String employeeCode;
   final String? employeeName;
@@ -10,7 +11,8 @@ class Records {
   final DateTime? syncedTime;
 
   Records({
-    required this.id, 
+    required this.id,
+    required this.recordId,
     required this.source,
     required this.employeeCode,
     this.employeeName,
@@ -21,16 +23,17 @@ class Records {
 
   Map<String, dynamic> toMap() => {
     "id": id,
-    "source_id": source.id,
+    "record_id": recordId,
+    "source_id": source.sourceId,
     "employee_code": employeeCode,
-    "employee_name": employeeName,
-    "attendance_time": attendanceTime,
-    "created_time": createdTime,
-    "synced_time": syncedTime,
+    "employee_name": employeeName ?? "",
+    "attendance_time": attendanceTime.toUtc().millisecondsSinceEpoch,
+    "created_time": createdTime?.toUtc().millisecondsSinceEpoch ?? DateTime.now().toUtc().millisecondsSinceEpoch,
+    "synced_time": syncedTime?.toUtc().millisecondsSinceEpoch,
   };
 
   @override
   String toString() {
-    return 'Records{id: $id, source_id: $source, employee_code: $employeeCode, attendance_time: $attendanceTime}';
+    return 'Records{record_id: $recordId, source_name: ${source.name}, employee_code: $employeeCode, attendance_time: $attendanceTime}';
   }
 }
