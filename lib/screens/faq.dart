@@ -10,7 +10,8 @@ class FaqScreen extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
-            child: Card(
+            child: Card.filled(
+              margin: const EdgeInsets.only(top: 14, bottom: 14, right: 8),
               color: Theme.of(context).colorScheme.onSecondary,
               child: Padding(
                 padding: const EdgeInsets.all(24),

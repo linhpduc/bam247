@@ -81,9 +81,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Widget createScreenFor(ScreenSelected screenSelected,) => switch (screenSelected) {
-    ScreenSelected.home => const Expanded(
-      child: HomeScreen(),
-    ),
+    ScreenSelected.home => const HomeScreen(),
     ScreenSelected.sources => const SourceScreen(),
     ScreenSelected.records => const RecordScreen(),
     ScreenSelected.helps => const FaqScreen(),
@@ -165,12 +163,12 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Expanded(
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
-            child: Card(
+            child: Card.filled(
+              margin: const EdgeInsets.only(top: 14, bottom: 14, right: 8),
               color: Theme.of(context).colorScheme.onSecondary,
               child: Padding(
                 padding: const EdgeInsets.all(24),
