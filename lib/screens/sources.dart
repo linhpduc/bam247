@@ -1,85 +1,30 @@
+import 'package:batt247/components.dart';
 import 'package:flutter/material.dart';
 import '../models/sources.dart';
 import '../utils/database.dart';
 
-class DatasourceScreen extends StatefulWidget {
-  const DatasourceScreen({super.key});
+class SourceScreen extends StatefulWidget {
+  const SourceScreen({super.key});
 
   @override
-  State<DatasourceScreen> createState() => _DatasourceState();
+  State<SourceScreen> createState() => _SourceScreenState();
 }
 
-class _DatasourceState extends State<DatasourceScreen> {
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return const SingleChildScrollView(
-            child: LogSourceDT(),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class LogSource extends DataTableSource {
-  List<Sources>? data;
-  LogSource({required this.data});
-
-  @override
-  int get rowCount => data?.length ?? 0;
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get selectedRowCount => 0;
-
-  @override
-  DataRow? getRow(int index) {
-    return index <= rowCount
-    ? DataRow(
-      cells: [
-        DataCell(Text(data![index].name)),
-        DataCell(Text(data![index].description ?? "")),
-        const DataCell(Text("status")),
-        const DataCell(Text("d")),
-      ],
-      onSelectChanged: (newValue) {
-        print(newValue);
-      }
-      )
-    : null;
-  }
-}
-
-class LogSourceDT extends StatefulWidget {
-  const LogSourceDT({super.key});
-
-  @override
-  State<LogSourceDT> createState() => _LogSourceDTState();
-}
-
-class _LogSourceDTState extends State<LogSourceDT> {
+class _SourceScreenState extends State<SourceScreen> {
   Batt247Database db = Batt247Database.instance;
-  List<Sources>? filterSources;
-  int _pageSize = 10;
+
+  final List<SourceModel> sources = mySources;
+  String filterName = '';
+  List<SourceModel> filteredSources = [];
 
   @override
   void initState() {
-    db.getAllSource().then((values) {
-      setState(() {
-        filterSources = values;
-      });
-    });
+    // db.getAllSource().then((items) {
+    //   setState(() {
+    //     filteredSources = items;
+    //   });
+    // });
+    filteredSources = sources;
     super.initState();
   }
 
@@ -89,50 +34,62 @@ class _LogSourceDTState extends State<LogSourceDT> {
     super.dispose();
   }
 
+  void filterSourceByName(String name) { 
+    setState(() { 
+      filterName = name;
+      filteredSources = sources 
+          .where((source) => source.name.contains(filterName)) 
+          .toList(); 
+    }); 
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PaginatedDataTable(
-      availableRowsPerPage: const [5, 10, 25, 50],
-      rowsPerPage: _pageSize,
-      onRowsPerPageChanged: (value) {
-        setState(() {
-          _pageSize = value!;
-        });
-      },
-      showCheckboxColumn: true,
-      header: Container(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.black45,
-          ),
-          borderRadius: BorderRadius.circular(8)
-        ),
-        child: TextField(
-          controller: TextEditingController(),
-          decoration: const InputDecoration(hintText: "Enter something to filter"),
-          onChanged: (value) {
-            setState(() {
-              mySources = filterSources!.where((row) => row.name.contains(value)).toList();
-            });
-          },
-        ),
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Card(
+            color: Theme.of(context).colorScheme.onSecondary,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Shadow Color Only',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    divider,
+                    TextField(
+                      decoration: const InputDecoration(labelText: 'Filter by name'),
+                      onChanged: filterSourceByName,
+                    ),
+                    divider,
+                    for (var source in filteredSources)
+                      SourceItem(info: source)
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
-      columns: const <DataColumn>[
-        DataColumn(
-          label: Text('Name'),
-        ),
-        DataColumn(
-          label: Text('Desciption'),
-        ),
-        DataColumn(
-          label: Text('Status'),
-        ),
-        DataColumn(
-          label: Text('#'),
-        ),
-      ],
-      source: LogSource(data: mySources),
     );
+  }
+}
+
+class SourceItem extends StatefulWidget {
+  const SourceItem({super.key, required this.info});
+  final SourceModel info;
+
+  @override
+  State<SourceItem> createState() => _SourceItemState();
+}
+
+class _SourceItemState extends State<SourceItem> {
+  @override
+  Widget build(BuildContext context) {
+    return Text(widget.info.name);
   }
 }

@@ -84,7 +84,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     ScreenSelected.home => const Expanded(
       child: HomeScreen(),
     ),
-    ScreenSelected.sources => const DatasourceScreen(),
+    ScreenSelected.sources => const SourceScreen(),
     ScreenSelected.records => const RecordScreen(),
     ScreenSelected.helps => const FaqScreen(),
   };

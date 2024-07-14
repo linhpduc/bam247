@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common_ffi/windows/sqflite_ffi_setup.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:batt247/models/machines.dart';
@@ -17,6 +16,7 @@ class Batt247Database {
 
   static Database? _database;
 
+  // Singleton
   Future<Database> get database async {
     if (_database != null) {
       return _database!;
@@ -37,12 +37,12 @@ class Batt247Database {
 
   Future<void> _createDatabase(Database db, _) async {
     return await db.execute('''
-      CREATE TABLE ${SourceTypes.tableName}(
+      CREATE TABLE ${SourceTypeModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         code VARCHAR(16), 
         name VARCHAR(256)
       );
-      CREATE TABLE ${Sources.tableName}(
+      CREATE TABLE ${SourceModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         source_id CHARACTER(36),
         name VARCHAR(256),
@@ -55,7 +55,7 @@ class Batt247Database {
         client_secret TEXT,
         created_time INT
       );
-      CREATE TABLE ${Machines.tableName}(
+      CREATE TABLE ${MachineModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         source_id CHARACTER(36),
         brandname VARCHAR(64),
@@ -64,7 +64,7 @@ class Batt247Database {
         realtime_capturable INT,
         metadata TEXT
       );
-      CREATE TABLE ${Records.tableName}(
+      CREATE TABLE ${RecordModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         record_id CHARACTER(36),
         source_id CHARACTER(36),
@@ -74,20 +74,20 @@ class Batt247Database {
         created_time INT,
         synced_time INT
       );
-      INSERT INTO ${SourceTypes.tableName}(code, name) VALUES ('machine', 'Attendance machines');
+      INSERT INTO ${SourceTypeModel.tableName}(code, name) VALUES ('machine', 'Attendance machines');
     ''');
   }
 
-  Future<Sources> create(Sources source) async {
+  Future<SourceModel> create(SourceModel source) async {
     final db = await instance.database;
-    final id = await db.insert(Sources.tableName, source.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    final id = await db.insert(SourceModel.tableName, source.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     return source.copy(id: id);
   }
 
-  Future<List<Sources>> getAllSource() async {
+  Future<List<SourceModel>> getAllSource() async {
     final db = await instance.database;
-    var res = await db.query(Sources.tableName);
-    List<Sources> list = res.isNotEmpty ? res.map((s) => Sources.fromMap(s)).toList(): [];
+    var res = await db.query(SourceModel.tableName);
+    List<SourceModel> list = res.isNotEmpty ? res.map((s) => SourceModel.fromMap(s)).toList(): [];
     return list;
   }
 
