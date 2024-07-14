@@ -1,30 +1,30 @@
 import 'source_types.dart';
 
 class SourceModel {
-  final int id;
-  final String sourceId;
-  final String name;
+  final int? id;
+  final String? sourceId;
+  final String? name;
   final String? description;
-  final SourceTypeModel type;
+  final SourceTypeModel? type;
   final int? intervalInSeconds;
-  final bool? realtimeEnabled;
-  final String clientEndpoint;
-  final String clientId;
-  final String clientSecret;
+  final int? realtimeEnabled;
+  final String? clientEndpoint;
+  final String? clientId;
+  final String? clientSecret;
   final DateTime? createdTime;
   static String tableName = 'sources';
 
   SourceModel({
-    required this.id, 
-    required this.sourceId,
-    required this.name, 
+    this.id, 
+    this.sourceId,
+    this.name, 
     this.description, 
-    required this.type, 
+    this.type, 
     this.intervalInSeconds, 
     this.realtimeEnabled, 
-    required this.clientEndpoint, 
-    required this.clientId, 
-    required this.clientSecret, 
+    this.clientEndpoint, 
+    this.clientId, 
+    this.clientSecret, 
     this.createdTime,
   });
 
@@ -33,7 +33,7 @@ class SourceModel {
     "source_id": sourceId,
     "name": name,
     "description": description ?? "",
-    "type": type.name,
+    "type": type?.name,
     "interval_in_seconds": intervalInSeconds ?? 600,
     "realtime_enabled": realtimeEnabled ?? 0,
     "client_endpoint": clientEndpoint,
@@ -45,7 +45,7 @@ class SourceModel {
   factory SourceModel.fromMap(Map<String, dynamic> map) => SourceModel(
     id: map["id"],
     sourceId: map["source_id"],
-    name: map["description"],
+    name: map["name"],
     description: map["description"],
     type: typeSample,
     intervalInSeconds: map["interval_in_seconds"],
@@ -63,7 +63,7 @@ class SourceModel {
   String? description,
   SourceTypeModel? type,
   int? intervalInSeconds,
-  bool? realtimeEnabled,
+  int? realtimeEnabled,
   String? clientEndpoint,
   String? clientId,
   String? clientSecret,
@@ -75,7 +75,7 @@ class SourceModel {
     description: description ?? this.description,
     type: type ?? this.type,
     intervalInSeconds: intervalInSeconds ?? this.intervalInSeconds,
-    realtimeEnabled: realtimeEnabled ?? this.realtimeEnabled,
+    realtimeEnabled: realtimeEnabled,
     clientEndpoint: clientEndpoint ?? this.clientEndpoint,
     clientId: clientId ?? this.clientId,
     clientSecret: clientSecret ?? this.clientSecret,
@@ -95,7 +95,7 @@ SourceModel s1 = SourceModel(
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
-      realtimeEnabled: false,
+      realtimeEnabled: 0,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
@@ -107,7 +107,7 @@ SourceModel s2 = SourceModel(
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
-      realtimeEnabled: false,
+      realtimeEnabled: 0,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
@@ -119,7 +119,7 @@ SourceModel s3 = SourceModel(
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
-      realtimeEnabled: false,
+      realtimeEnabled: 0,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
