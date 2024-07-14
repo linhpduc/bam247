@@ -19,7 +19,7 @@ class _SourceScreenState extends State<SourceScreen> {
 
   @override
   void initState() {
-    db.getAllSource().then((items) {
+    db.readAllSource().then((items) {
       setState(() {
         filteredSources = items;
       });
@@ -122,7 +122,7 @@ class _SourceScreenState extends State<SourceScreen> {
               ),
               child: const Text('Create'),
               onPressed: () {
-                db.create(SourceModel.fromMap({"source_id": "23423523", "name": nameCtrl.text, "created_time": 1720952235709}));
+                db.createSource(SourceModel.fromMap({"source_id": "23423523", "name": nameCtrl.text, "created_time": 1720952235709}));
                 Navigator.of(context).pop();
               },
             ),

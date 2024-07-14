@@ -78,17 +78,36 @@ class Batt247Database {
     ''');
   }
 
-  Future<SourceModel> create(SourceModel source) async {
+  Future<SourceModel> createSource(SourceModel source) async {
     final db = await instance.database;
     final id = await db.insert(SourceModel.tableName, source.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     return source.copy(id: id);
   }
 
-  Future<List<SourceModel>> getAllSource() async {
+  Future<List<SourceModel>> readAllSource() async {
     final db = await instance.database;
     var res = await db.query(SourceModel.tableName);
     List<SourceModel> list = res.isNotEmpty ? res.map((s) => SourceModel.fromMap(s)).toList(): [];
     return list;
+  }
+
+  Future<SourceModel> readSource(int id) async {
+    final db = await instance.database;
+    final results = await db.query(SourceModel.tableName, where: 'id = ?', whereArgs: [id]);
+    if (results.isNotEmpty) {
+      return SourceModel.fromMap(results.first);
+    }
+    throw Exception('ID $id not found.');
+  }
+
+  Future<int> updateSource(SourceModel source) async {
+    final db = await instance.database;
+    return await db.update(SourceModel.tableName, source.toMap(), where: 'id = ?', whereArgs: [source.id]);
+  }
+
+  Future<int> deleteSource(int id) async {
+    final db = await instance.database;
+    return await db.delete(SourceModel.tableName, where: 'id = ?', whereArgs: [id]);
   }
 
   Future close() async {

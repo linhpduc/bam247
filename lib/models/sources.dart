@@ -7,7 +7,7 @@ class SourceModel {
   final String? description;
   final SourceTypeModel? type;
   final int? intervalInSeconds;
-  final int? realtimeEnabled;
+  final bool? realtimeEnabled;
   final String? clientEndpoint;
   final String? clientId;
   final String? clientSecret;
@@ -43,13 +43,13 @@ class SourceModel {
   };
 
   factory SourceModel.fromMap(Map<String, dynamic> map) => SourceModel(
-    id: map["id"],
-    sourceId: map["source_id"],
+    id: map["id"] as int?,
+    sourceId: map["source_id"] as String?,
     name: map["name"],
     description: map["description"],
     type: typeSample,
     intervalInSeconds: map["interval_in_seconds"],
-    realtimeEnabled: map["realtime_enabled"],
+    realtimeEnabled: map["realtime_enabled"] == 1,
     clientEndpoint: map["client_endpoint"],
     clientId: map["client_id"],
     clientSecret: map["client_secret"],
@@ -63,7 +63,7 @@ class SourceModel {
   String? description,
   SourceTypeModel? type,
   int? intervalInSeconds,
-  int? realtimeEnabled,
+  bool? realtimeEnabled,
   String? clientEndpoint,
   String? clientId,
   String? clientSecret,
@@ -95,7 +95,7 @@ SourceModel s1 = SourceModel(
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
-      realtimeEnabled: 0,
+      realtimeEnabled: false,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
@@ -107,7 +107,7 @@ SourceModel s2 = SourceModel(
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
-      realtimeEnabled: 0,
+      realtimeEnabled: false,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
@@ -119,7 +119,7 @@ SourceModel s3 = SourceModel(
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
-      realtimeEnabled: 0,
+      realtimeEnabled: false,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
