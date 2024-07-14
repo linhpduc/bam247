@@ -1,9 +1,9 @@
 import 'sources.dart';
 
-class Records {
+class RecordModel {
   final int id;
   final String recordId;
-  final Sources source;
+  final SourceModel source;
   final String employeeCode;
   final String? employeeName;
   final DateTime attendanceTime;
@@ -11,7 +11,7 @@ class Records {
   final DateTime? syncedTime;
   static String tableName = 'records';
 
-  Records({
+  RecordModel({
     required this.id,
     required this.recordId,
     required this.source,
@@ -35,6 +35,6 @@ class Records {
 
   @override
   String toString() {
-    return 'Records{record_id: $recordId, source_name: ${source.name}, employee_code: $employeeCode, attendance_time: $attendanceTime}';
+    return 'RecordModel{record_id: $recordId, source_name: ${source.name}, employee_code: $employeeCode, attendance_time: $attendanceTime}';
   }
 }

@@ -1,11 +1,11 @@
 import 'source_types.dart';
 
-class Sources {
+class SourceModel {
   final int id;
   final String sourceId;
   final String name;
   final String? description;
-  final SourceTypes type;
+  final SourceTypeModel type;
   final int? intervalInSeconds;
   final bool? realtimeEnabled;
   final String clientEndpoint;
@@ -14,7 +14,7 @@ class Sources {
   final DateTime? createdTime;
   static String tableName = 'sources';
 
-  Sources({
+  SourceModel({
     required this.id, 
     required this.sourceId,
     required this.name, 
@@ -42,7 +42,7 @@ class Sources {
     "created_time": createdTime?.toUtc().millisecondsSinceEpoch ?? DateTime.now().toUtc().millisecondsSinceEpoch,
   };
 
-  factory Sources.fromMap(Map<String, dynamic> map) => Sources(
+  factory SourceModel.fromMap(Map<String, dynamic> map) => SourceModel(
     id: map["id"],
     sourceId: map["source_id"],
     name: map["description"],
@@ -56,19 +56,19 @@ class Sources {
     createdTime: DateTime.fromMillisecondsSinceEpoch(map["created_time"], isUtc: true),
   );
 
-  Sources copy({
+  SourceModel copy({
   int? id,
   String? sourceId,
   String? name,
   String? description,
-  SourceTypes? type,
+  SourceTypeModel? type,
   int? intervalInSeconds,
   bool? realtimeEnabled,
   String? clientEndpoint,
   String? clientId,
   String? clientSecret,
   DateTime? createdTime,
-  }) => Sources(
+  }) => SourceModel(
     id: id ?? this.id,
     sourceId: sourceId ?? this.sourceId,
     name: name ?? this.name,
@@ -84,11 +84,11 @@ class Sources {
 
   @override
   String toString() {
-    return 'Sources{source_id: $sourceId, name: $name, type: $type}';
+    return 'SourceModel{source_id: $sourceId, name: $name, type: $type}';
   }
 }
 
-Sources s1 = Sources(
+SourceModel s1 = SourceModel(
       id: 1,
       sourceId: "s_a46058eb9418",
       name: "Văn phòng HN",
@@ -100,10 +100,10 @@ Sources s1 = Sources(
       clientId: "45234",
       clientSecret: "0",
       createdTime: DateTime(2017, 9, 7, 17, 30));
-Sources s2 = Sources(
+SourceModel s2 = SourceModel(
       id: 2,
       sourceId: "s_84fc085cf219",
-      name: "Văn phòng HN",
+      name: "Chi nhánh HCM",
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
@@ -112,10 +112,10 @@ Sources s2 = Sources(
       clientId: "45234",
       clientSecret: "0",
       createdTime: DateTime(2017, 9, 7, 17, 30));
-Sources s3 = Sources(
+SourceModel s3 = SourceModel(
       id: 3,
       sourceId: "s_c4229d8e5f74",
-      name: "Văn phòng HN",
+      name: "Thủ phủ Đà Nẵng",
       description: "",
       type: typeSample,
       intervalInSeconds: 600,
@@ -125,4 +125,4 @@ Sources s3 = Sources(
       clientSecret: "0",
       createdTime: DateTime(2017, 9, 7, 17, 30));
 
-List<Sources> mySources = [s1, s2,s3];
+List<SourceModel> mySources = [s1, s2,s3];

@@ -1,8 +1,8 @@
 import 'sources.dart';
 
-class Machines {
+class MachineModel {
   final int id;
-  final Sources source;
+  final SourceModel source;
   final String? brandname;
   final String ipAddress;
   final int tcpPort;
@@ -10,7 +10,7 @@ class Machines {
   final String? metadata;
   static String tableName = 'machines';
 
-  Machines({
+  MachineModel({
     required this.id,
     required this.source,
     this.brandname, 
@@ -32,12 +32,12 @@ class Machines {
 
   @override
   String toString() {
-    return 'Machines{machine_id: $id, source_name: ${source.name}, endpoint: "$ipAddress:$tcpPort"}';
+    return 'MachineModel{machine_id: $id, source_name: ${source.name}, endpoint: "$ipAddress:$tcpPort"}';
   }
 }
 
-Machines m1 = Machines(id: 1, source: s1, ipAddress: "10.0.1.1", tcpPort: 4370);
-Machines m2 = Machines(id: 2, source: s2, ipAddress: "10.0.1.2", tcpPort: 4370);
-Machines m3 = Machines(id: 3, source: s3, ipAddress: "10.0.1.3", tcpPort: 4370);
+MachineModel m1 = MachineModel(id: 1, source: s1, ipAddress: "10.0.1.1", tcpPort: 4370);
+MachineModel m2 = MachineModel(id: 2, source: s2, ipAddress: "10.0.1.2", tcpPort: 4370);
+MachineModel m3 = MachineModel(id: 3, source: s3, ipAddress: "10.0.1.3", tcpPort: 4370);
 
-List<Machines> machinesSample = [m1, m2, m3];
+List<MachineModel> machinesSample = [m1, m2, m3];
