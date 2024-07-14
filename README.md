@@ -6,9 +6,16 @@ A brandnew client to collect the attendance records for Base Checkin application
 
 ### Run app using terminal
 
+Clone source code:
+
 ```shell
 $ git clone git@git.base.vn:ng/bcc24.git
 $ cd bcc24
+```
+
+Install dependencies and run
+```shell
+$ flutter pub get
 $ flutter run
 ```
 
