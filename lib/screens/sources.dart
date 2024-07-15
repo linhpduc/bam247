@@ -264,24 +264,16 @@ class _SourceItemState extends State<SourceItem> {
         itemBuilder: (BuildContext context) =>
             <PopupMenuEntry<ListTileTitleAlignment>>[
           const PopupMenuItem<ListTileTitleAlignment>(
-            value: ListTileTitleAlignment.threeLine,
-            child: Text('threeLine'),
-          ),
-          const PopupMenuItem<ListTileTitleAlignment>(
-            value: ListTileTitleAlignment.titleHeight,
-            child: Text('titleHeight'),
-          ),
-          const PopupMenuItem<ListTileTitleAlignment>(
             value: ListTileTitleAlignment.top,
-            child: Text('top'),
+            child: Text('Sync'),
           ),
           const PopupMenuItem<ListTileTitleAlignment>(
             value: ListTileTitleAlignment.center,
-            child: Text('center'),
+            child: Text('Edit'),
           ),
           const PopupMenuItem<ListTileTitleAlignment>(
             value: ListTileTitleAlignment.bottom,
-            child: Text('bottom'),
+            child: Text('Remove'),
           ),
         ],
       ),

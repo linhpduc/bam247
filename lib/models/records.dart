@@ -1,20 +1,19 @@
-import 'sources.dart';
-
 class RecordModel {
-  final int id;
+  final int? id;
   final String recordId;
-  final SourceModel source;
+  final String sourceId;
   final String employeeCode;
   final String? employeeName;
   final DateTime attendanceTime;
   final DateTime? createdTime;
   final DateTime? syncedTime;
+  
   static String tableName = 'records';
 
   RecordModel({
-    required this.id,
+    this.id,
     required this.recordId,
-    required this.source,
+    required this.sourceId,
     required this.employeeCode,
     this.employeeName,
     required this.attendanceTime,
@@ -25,7 +24,7 @@ class RecordModel {
   Map<String, dynamic> toMap() => {
     "id": id,
     "record_id": recordId,
-    "source_id": source.sourceId,
+    "source_id": sourceId,
     "employee_code": employeeCode,
     "employee_name": employeeName ?? "",
     "attendance_time": attendanceTime.toUtc().millisecondsSinceEpoch,
@@ -35,6 +34,6 @@ class RecordModel {
 
   @override
   String toString() {
-    return 'RecordModel{record_id: $recordId, source_name: ${source.name}, employee_code: $employeeCode, attendance_time: $attendanceTime}';
+    return 'RecordModel{record_id: $recordId, source_id: $sourceId, employee_code: $employeeCode, attendance_time: $attendanceTime}';
   }
 }
