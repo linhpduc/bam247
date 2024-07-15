@@ -1,5 +1,3 @@
-import 'sources.dart';
-
 class MachineModel {
   final int? id;
   final String sourceId;

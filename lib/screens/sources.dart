@@ -218,14 +218,20 @@ class _SourceScreenState extends State<SourceScreen> {
                   color: Theme.of(context).colorScheme.onSecondary,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: filteredSources.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return SourceItem(info: filteredSources[index]);
-                      },
-                      separatorBuilder: (BuildContext context, int index) => const Divider(),
-                    ),
+                    child: filteredSources.isNotEmpty 
+                      ? ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: filteredSources.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return SourceItem(info: filteredSources[index]);
+                        },
+                        separatorBuilder: (BuildContext context, int index) => const Divider(),
+                      )
+                      : const ListTile(
+                        titleAlignment: ListTileTitleAlignment.center,
+                        leading: Icon(Icons.sentiment_very_dissatisfied),
+                        title: Text("No record to display."),
+                      ),
                   ),
                 ),
               ],
