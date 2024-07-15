@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:batt247/models/machines.dart';
 import 'package:batt247/models/records.dart';
-import 'package:batt247/models/source_types.dart';
 import 'package:batt247/models/sources.dart';
 
 class Batt247Database {
@@ -30,24 +29,19 @@ class Batt247Database {
     sqfliteFfiInit();
     final databaseFactory = databaseFactoryFfi;
     final Directory appDocumentsDir = await getApplicationDocumentsDirectory();
-    String path = join(appDocumentsDir.path, "dbs", 'batt247.db');
+    String path = join(appDocumentsDir.path, ".dbs", 'bam247.db');
     print(path);
     return await databaseFactory.openDatabase(path, options: OpenDatabaseOptions(version: 1, onCreate: _createDatabase,));
   }
 
   Future<void> _createDatabase(Database db, _) async {
     return await db.execute('''
-      CREATE TABLE ${SourceTypeModel.tableName}(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        code VARCHAR(16), 
-        name VARCHAR(256)
-      );
       CREATE TABLE ${SourceModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         source_id CHARACTER(36),
+        type_code VARCHAR(32),
         name VARCHAR(256),
         description TEXT,
-        type VARCHAR(256),
         interval_in_seconds INT,
         realtime_enabled INT, 
         client_endpoint TEXT,
@@ -68,20 +62,19 @@ class Batt247Database {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         record_id CHARACTER(36),
         source_id CHARACTER(36),
-        employee_code VARCHAR(256),
+        employee_code VARCHAR(64),
         employee_name TEXT,
         attendance_time INT,
         created_time INT,
         synced_time INT
       );
-      INSERT INTO ${SourceTypeModel.tableName}(code, name) VALUES ('machine', 'Attendance machines');
     ''');
   }
 
-  Future<SourceModel> createSource(SourceModel source) async {
+  Future<int> createSource(Map<String, dynamic> object) async {
     final db = await instance.database;
-    final id = await db.insert(SourceModel.tableName, source.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
-    return source.copy(id: id);
+    object['created_time'] = DateTime.now().toUtc().millisecondsSinceEpoch;
+    return await db.insert(SourceModel.tableName, object, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<SourceModel>> readAllSource() async {
@@ -108,6 +101,11 @@ class Batt247Database {
   Future<int> deleteSource(int id) async {
     final db = await instance.database;
     return await db.delete(SourceModel.tableName, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> createMachine( Map<String, dynamic> mapObject) async {
+    final db = await instance.database;
+    return await db.insert(MachineModel.tableName, mapObject, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future close() async {

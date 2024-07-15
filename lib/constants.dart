@@ -24,3 +24,11 @@ enum ScreenSelected {
   const ScreenSelected(this.value);
   final int value;
 }
+
+enum SourceTypeModel {
+  machine("machine", "Attendance Machines");
+
+  const SourceTypeModel(this.code, this.name);
+  final String code;
+  final String name;
+}

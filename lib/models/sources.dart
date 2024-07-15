@@ -1,27 +1,28 @@
-import 'source_types.dart';
+import '../constants.dart';
 
 class SourceModel {
   final int? id;
-  final String? sourceId;
-  final String? name;
-  final String? description;
-  final SourceTypeModel? type;
-  final int? intervalInSeconds;
-  final bool? realtimeEnabled;
-  final String? clientEndpoint;
-  final String? clientId;
-  final String? clientSecret;
-  final DateTime? createdTime;
+  final String sourceId;
+  String name;
+  String? description;
+  SourceTypeModel typeCode;
+  int? intervalInSeconds;
+  int? realtimeEnabled;
+  String? clientEndpoint;
+  String? clientId;
+  String? clientSecret;
+  DateTime? createdTime;
+  
   static String tableName = 'sources';
 
   SourceModel({
     this.id, 
-    this.sourceId,
-    this.name, 
+    required this.sourceId,
+    required this.name, 
     this.description, 
-    this.type, 
-    this.intervalInSeconds, 
-    this.realtimeEnabled, 
+    required this.typeCode, 
+    this.intervalInSeconds = 600, 
+    this.realtimeEnabled = 0, 
     this.clientEndpoint, 
     this.clientId, 
     this.clientSecret, 
@@ -33,58 +34,32 @@ class SourceModel {
     "source_id": sourceId,
     "name": name,
     "description": description ?? "",
-    "type": type?.name,
+    "type_code": typeCode.code,
     "interval_in_seconds": intervalInSeconds ?? 600,
     "realtime_enabled": realtimeEnabled ?? 0,
     "client_endpoint": clientEndpoint,
     "client_id": clientId,
     "client_secret": clientSecret,
-    "created_time": createdTime?.toUtc().millisecondsSinceEpoch ?? DateTime.now().toUtc().millisecondsSinceEpoch,
+    "created_time": createdTime?.toUtc().millisecondsSinceEpoch,
   };
 
   factory SourceModel.fromMap(Map<String, dynamic> map) => SourceModel(
-    id: map["id"] as int?,
-    sourceId: map["source_id"] as String?,
+    id: map["id"],
+    sourceId: map["source_id"],
     name: map["name"],
     description: map["description"],
-    type: typeSample,
+    typeCode: SourceTypeModel.values.byName(map["type_code"]),
     intervalInSeconds: map["interval_in_seconds"],
-    realtimeEnabled: map["realtime_enabled"] == 1,
+    realtimeEnabled: map["realtime_enabled"],
     clientEndpoint: map["client_endpoint"],
     clientId: map["client_id"],
     clientSecret: map["client_secret"],
-    createdTime: DateTime.fromMillisecondsSinceEpoch(map["created_time"], isUtc: true),
+    createdTime: DateTime.fromMillisecondsSinceEpoch(map["created_time"]),
   );
-
-  SourceModel copy({
-  int? id,
-  String? sourceId,
-  String? name,
-  String? description,
-  SourceTypeModel? type,
-  int? intervalInSeconds,
-  bool? realtimeEnabled,
-  String? clientEndpoint,
-  String? clientId,
-  String? clientSecret,
-  DateTime? createdTime,
-  }) => SourceModel(
-    id: id ?? this.id,
-    sourceId: sourceId ?? this.sourceId,
-    name: name ?? this.name,
-    description: description ?? this.description,
-    type: type ?? this.type,
-    intervalInSeconds: intervalInSeconds ?? this.intervalInSeconds,
-    realtimeEnabled: realtimeEnabled,
-    clientEndpoint: clientEndpoint ?? this.clientEndpoint,
-    clientId: clientId ?? this.clientId,
-    clientSecret: clientSecret ?? this.clientSecret,
-    createdTime: createdTime ?? this.createdTime,
-    );
 
   @override
   String toString() {
-    return 'SourceModel{source_id: $sourceId, name: $name, type: $type}';
+    return 'SourceModel{source_id: $sourceId, name: $name, type: $typeCode}';
   }
 }
 
@@ -93,9 +68,9 @@ SourceModel s1 = SourceModel(
       sourceId: "s_a46058eb9418",
       name: "Văn phòng HN",
       description: "",
-      type: typeSample,
+      typeCode: SourceTypeModel.machine,
       intervalInSeconds: 600,
-      realtimeEnabled: false,
+      realtimeEnabled: 0,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
@@ -105,9 +80,9 @@ SourceModel s2 = SourceModel(
       sourceId: "s_84fc085cf219",
       name: "Chi nhánh HCM",
       description: "",
-      type: typeSample,
+      typeCode:SourceTypeModel.machine,
       intervalInSeconds: 600,
-      realtimeEnabled: false,
+      realtimeEnabled: 0,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
@@ -117,9 +92,9 @@ SourceModel s3 = SourceModel(
       sourceId: "s_c4229d8e5f74",
       name: "Thủ phủ Đà Nẵng",
       description: "",
-      type: typeSample,
+      typeCode: SourceTypeModel.machine,
       intervalInSeconds: 600,
-      realtimeEnabled: false,
+      realtimeEnabled: 0,
       clientEndpoint: "https://checkin.base.vn",
       clientId: "45234",
       clientSecret: "0",
