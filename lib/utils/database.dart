@@ -84,7 +84,7 @@ class Batt247Database {
     return list;
   }
 
-  Future<SourceModel> readSource(int id) async {
+  Future<SourceModel> readSource(String id) async {
     final db = await instance.database;
     final results = await db.query(SourceModel.tableName, where: 'source_id = ?', whereArgs: [id]);
     if (results.isNotEmpty) {
@@ -98,7 +98,7 @@ class Batt247Database {
     return await db.update(SourceModel.tableName, source.toMap(), where: 'source_id = ?', whereArgs: [source.sourceId]);
   }
 
-  Future<int> deleteSource(int id) async {
+  Future<int> deleteSource(String id) async {
     final db = await instance.database;
     return await db.delete(SourceModel.tableName, where: 'source_id = ?', whereArgs: [id]);
   }
@@ -106,6 +106,11 @@ class Batt247Database {
   Future<int> createMachine( Map<String, dynamic> object) async {
     final db = await instance.database;
     return await db.insert(MachineModel.tableName, object, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> deleteMachine(String sourceId) async {
+    final db = await instance.database;
+    return await db.delete(MachineModel.tableName, where: 'source_id = ?', whereArgs: [sourceId]);
   }
 
   Future close() async {

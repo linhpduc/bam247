@@ -9,6 +9,7 @@ import '../models/sources.dart';
 import '../utils/database.dart';
 
 var uuid = const Uuid();
+enum ActionMenu { resync, edit, remove }
 
 class SourceScreen extends StatefulWidget {
   const SourceScreen({super.key});
@@ -65,7 +66,7 @@ class _SourceScreenState extends State<SourceScreen> {
       description: "",
       intervalInSeconds: 600,
       realtimeEnabled: 0,
-      clientEndpoint: "https://checkin.base.vn",
+      clientEndpoint: "",
       clientId: "",
       clientSecret: "",
     );
@@ -81,7 +82,7 @@ class _SourceScreenState extends State<SourceScreen> {
       context: context, 
       builder: (BuildContext context) {
         var ctrlName = TextEditingController();
-        var ctrlEndpoint = TextEditingController();
+        var ctrlTCPConnection = TextEditingController();
         var ctrlClientEndpoint = TextEditingController();
         var ctrlClientID = TextEditingController();
         var ctrlClientSecret = TextEditingController();
@@ -105,7 +106,7 @@ class _SourceScreenState extends State<SourceScreen> {
                           TextFormField(
                             controller: ctrlName,
                             decoration: const InputDecoration(
-                              labelText: "Display name*",
+                              labelText: "Display Name*",
                               hintText: 'E.g: Headquarter office',
                               border: OutlineInputBorder(),
                               // isDense: true,
@@ -143,9 +144,9 @@ class _SourceScreenState extends State<SourceScreen> {
                           ),
                           divider,
                           TextFormField(
-                            controller: ctrlEndpoint,
+                            controller: ctrlTCPConnection,
                             decoration: const InputDecoration(
-                              labelText: "Connection endpoint*",
+                              labelText: "Connection IP Address*",
                               hintText: 'E.g: 192.168.1.1:4370',
                               border: OutlineInputBorder(),
                               // isDense: true,
@@ -175,7 +176,7 @@ class _SourceScreenState extends State<SourceScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          const Text("Base Checkin configurations"),
+                          const Text("Synchronizing configurations (Base Checkin)"),
                           divider,
                           TextFormField(
                             controller: ctrlClientEndpoint,
@@ -218,7 +219,6 @@ class _SourceScreenState extends State<SourceScreen> {
                     ),
                   ),
                 ),
-                
               ],
             ),
           ),
@@ -239,10 +239,13 @@ class _SourceScreenState extends State<SourceScreen> {
               child: const Text('Create'),
               onPressed: () {
                 newSource.name = ctrlName.text;
+                newSource.clientEndpoint = ctrlClientEndpoint.text;
+                newSource.clientId = ctrlClientID.text;
+                newSource.clientSecret = ctrlClientSecret.text;
                 switch (newSource.typeCode) {
                   case SourceTypeModel.machine:
                     dbConn.createSource(newSource.toMap());
-                    List<String> tupleEndpoint = ctrlEndpoint.text.split(":");
+                    List<String> tupleEndpoint = ctrlTCPConnection.text.split(":");
                     newMachine.ipAddress = tupleEndpoint[0];
                     newMachine.tcpPort = tupleEndpoint.length > 1 ? int.parse(tupleEndpoint[1]) : 4370;
                     dbConn.createMachine(newMachine.toMap());
@@ -301,7 +304,7 @@ class _SourceScreenState extends State<SourceScreen> {
                         shrinkWrap: true,
                         itemCount: filteredSources.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return SourceItem(info: filteredSources[index]);
+                          return SourceItem(info: filteredSources[index], dbConn: dbConn, handleUpdateParentWidget: refreshSource,);
                         },
                         separatorBuilder: (BuildContext context, int index) => const Divider(),
                       )
@@ -322,42 +325,87 @@ class _SourceScreenState extends State<SourceScreen> {
 }
 
 class SourceItem extends StatefulWidget {
-  const SourceItem({super.key, required this.info});
+  const SourceItem({super.key, required this.info, required this.dbConn, required this.handleUpdateParentWidget});
   final SourceModel info;
+  final Batt247Database dbConn;
+  final void Function() handleUpdateParentWidget;
 
   @override
   State<SourceItem> createState() => _SourceItemState();
 }
 
 class _SourceItemState extends State<SourceItem> {
-  ListTileTitleAlignment? titleAlignment;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      titleAlignment: titleAlignment,
       leading: const Icon(Icons.devices_fold_outlined),
       title: Text(widget.info.name),
-      subtitle: Text(join(widget.info.description??"", widget.info.sourceId, widget.info.clientEndpoint??"", widget.info.clientId??"", widget.info.clientSecret??"", widget.info.createdTime?.toString())),
-      trailing: PopupMenuButton<ListTileTitleAlignment>(
-        onSelected: (ListTileTitleAlignment? value) {
-          setState(() {
-            titleAlignment = value;
-          });
+      subtitle: Text(join(widget.info.description??"", widget.info.clientEndpoint??"", widget.info.clientId??"", widget.info.clientSecret??"", widget.info.createdTime?.toString())),
+      trailing: PopupMenuButton<ActionMenu>(
+        color: Theme.of(context).colorScheme.onSecondary,
+        onSelected: (ActionMenu? action) {
+          switch (action) {
+            case ActionMenu.remove:
+              showDialog(
+                context: context, 
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Warning"),
+                    content: const Text("Do you want to remove this source?"),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, "Cancel"), child: const Text("Cancel")),
+                      FilledButton(
+                        onPressed: () {
+                          widget.dbConn.deleteSource(widget.info.sourceId);
+                          switch (widget.info.typeCode) {
+                            case SourceTypeModel.machine:
+                              widget.dbConn.deleteMachine(widget.info.sourceId);
+                              break;
+                            default:
+                          }
+                          Navigator.pop(context, "Remove");
+                        }, 
+                        child: const Text("Remove")),
+                    ],
+                  );
+                },
+              ).then((_) {
+                widget.handleUpdateParentWidget();
+              });
+              break;
+            default:
+          }
         },
         itemBuilder: (BuildContext context) =>
-            <PopupMenuEntry<ListTileTitleAlignment>>[
-          const PopupMenuItem<ListTileTitleAlignment>(
-            value: ListTileTitleAlignment.top,
-            child: Text('Sync'),
+            <PopupMenuEntry<ActionMenu>>[
+          PopupMenuItem<ActionMenu>(
+            value: ActionMenu.resync,
+            child: ListTile(
+              iconColor: Theme.of(context).colorScheme.secondary,
+              textColor: Theme.of(context).colorScheme.secondary,
+              leading: const Icon(Icons.sync,),
+              title: const Text('Resync'),
+            ),
           ),
-          const PopupMenuItem<ListTileTitleAlignment>(
-            value: ListTileTitleAlignment.center,
-            child: Text('Edit'),
+          PopupMenuItem<ActionMenu>(
+            value: ActionMenu.edit,
+            child: ListTile(
+              iconColor: Theme.of(context).colorScheme.secondary,
+              textColor: Theme.of(context).colorScheme.secondary,
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit'),
+            ),
           ),
-          const PopupMenuItem<ListTileTitleAlignment>(
-            value: ListTileTitleAlignment.bottom,
-            child: Text('Remove'),
+          const PopupMenuDivider(),
+          PopupMenuItem<ActionMenu>(
+            value: ActionMenu.remove,
+            child: ListTile(
+              iconColor: Theme.of(context).colorScheme.error,
+              textColor: Theme.of(context).colorScheme.error,
+              leading: const Icon(Icons.delete_forever),
+              title: const Text('Remove'),
+            ),
           ),
         ],
       ),
