@@ -86,7 +86,7 @@ class Batt247Database {
 
   Future<SourceModel> readSource(int id) async {
     final db = await instance.database;
-    final results = await db.query(SourceModel.tableName, where: 'id = ?', whereArgs: [id]);
+    final results = await db.query(SourceModel.tableName, where: 'source_id = ?', whereArgs: [id]);
     if (results.isNotEmpty) {
       return SourceModel.fromMap(results.first);
     }
@@ -95,17 +95,17 @@ class Batt247Database {
 
   Future<int> updateSource(SourceModel source) async {
     final db = await instance.database;
-    return await db.update(SourceModel.tableName, source.toMap(), where: 'id = ?', whereArgs: [source.id]);
+    return await db.update(SourceModel.tableName, source.toMap(), where: 'source_id = ?', whereArgs: [source.sourceId]);
   }
 
   Future<int> deleteSource(int id) async {
     final db = await instance.database;
-    return await db.delete(SourceModel.tableName, where: 'id = ?', whereArgs: [id]);
+    return await db.delete(SourceModel.tableName, where: 'source_id = ?', whereArgs: [id]);
   }
 
-  Future<int> createMachine( Map<String, dynamic> mapObject) async {
+  Future<int> createMachine( Map<String, dynamic> object) async {
     final db = await instance.database;
-    return await db.insert(MachineModel.tableName, mapObject, conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert(MachineModel.tableName, object, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future close() async {

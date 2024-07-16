@@ -69,11 +69,22 @@ class _SourceScreenState extends State<SourceScreen> {
       clientId: "",
       clientSecret: "",
     );
+    MachineModel newMachine = MachineModel(
+      sourceId: newSource.sourceId, 
+      brandname: MachineBrandname.unknown,
+      ipAddress: "", 
+      tcpPort: 4370,
+      realtimeCapturable: 0,
+      metadata: "",
+    );
     return showDialog(
       context: context, 
       builder: (BuildContext context) {
         var ctrlName = TextEditingController();
         var ctrlEndpoint = TextEditingController();
+        var ctrlClientEndpoint = TextEditingController();
+        var ctrlClientID = TextEditingController();
+        var ctrlClientSecret = TextEditingController();
         return AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.onSecondary,
           scrollable: true,
@@ -91,6 +102,16 @@ class _SourceScreenState extends State<SourceScreen> {
                         children: <Widget>[
                           const Text("Connection info"),
                           divider,
+                          TextFormField(
+                            controller: ctrlName,
+                            decoration: const InputDecoration(
+                              labelText: "Display name*",
+                              hintText: 'E.g: Headquarter office',
+                              border: OutlineInputBorder(),
+                              // isDense: true,
+                            ),
+                          ),
+                          divider,
                           DropdownMenu<String>(
                             initialSelection: newSource.typeCode.code,
                             onSelected: (String? code) {
@@ -99,41 +120,101 @@ class _SourceScreenState extends State<SourceScreen> {
                               });
                             },
                             dropdownMenuEntries: List.generate(SourceTypeModel.values.length, (index) {
-                              return DropdownMenuEntry<String>(value: SourceTypeModel.values[index].code, label: SourceTypeModel.values[index].name);
+                              return DropdownMenuEntry<String>(
+                                value: SourceTypeModel.values[index].code, 
+                                label: SourceTypeModel.values[index].name
+                              );
                             }).toList(),
                           ),
                           divider,
-                          TextFormField(
-                            controller: ctrlName,
-                            decoration: const InputDecoration(
-                              labelText: "Display name",
-                              hintText: 'E.g: Headquarter office',
-                              border: OutlineInputBorder(),
-                              isDense: true,
-                            ),
+                          DropdownMenu<String>(
+                            initialSelection: newMachine.brandname?.value,
+                            onSelected: (String? value) {
+                              setState(() {
+                                newMachine.brandname = MachineBrandname.values.byName(value!);
+                              });
+                            },
+                            dropdownMenuEntries: List.generate(MachineBrandname.values.length, (index) {
+                              return DropdownMenuEntry<String>(
+                                value: MachineBrandname.values[index].value, 
+                                label: MachineBrandname.values[index].name
+                              );
+                            }).toList(),
                           ),
                           divider,
                           TextFormField(
                             controller: ctrlEndpoint,
                             decoration: const InputDecoration(
-                              labelText: "Connection endpoint",
+                              labelText: "Connection endpoint*",
                               hintText: 'E.g: 192.168.1.1:4370',
                               border: OutlineInputBorder(),
-                              isDense: true,
-                              contentPadding: EdgeInsets.all(10),
+                              // isDense: true,
                             ),
+                          ),
+                          divider,
+                          Row(
+                            children: [
+                              FilledButton.tonal(
+                                onPressed: (){}, 
+                                child: const Text("Test connection")
+                              ),
+                              const Expanded(
+                                child: Icon(Icons.done),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-                const Expanded(
+                Expanded(
                   child: Card.filled(
-                    child: Column(
-                      children: [
-                        Text("Base Checkin configurations"),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const Text("Base Checkin configurations"),
+                          divider,
+                          TextFormField(
+                            controller: ctrlClientEndpoint,
+                            decoration: const InputDecoration(
+                              prefix: Text("https://"),
+                              labelText: "Client Endpoint",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          divider,
+                          TextFormField(
+                            controller: ctrlClientID,
+                            decoration: const InputDecoration(
+                              labelText: "Client ID",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          divider,
+                          TextFormField(
+                            controller: ctrlClientSecret,
+                            decoration: const InputDecoration(
+                              labelText: "Client Secret",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          divider,
+                          Row(
+                            children: [
+                              FilledButton.tonal(
+                                onPressed: (){}, 
+                                child: const Text("Sanity check")
+                              ),
+                              const Expanded(
+                                child: Icon(Icons.done),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -160,13 +241,10 @@ class _SourceScreenState extends State<SourceScreen> {
                 newSource.name = ctrlName.text;
                 switch (newSource.typeCode) {
                   case SourceTypeModel.machine:
-                    List<String> tupleEndpoint = ctrlEndpoint.text.split(":");
-                    MachineModel newMachine = MachineModel(
-                      sourceId: newSource.sourceId, 
-                      ipAddress: tupleEndpoint[0], 
-                      tcpPort: tupleEndpoint.length > 1 ? int.parse(tupleEndpoint[1]) : 4370
-                    );
                     dbConn.createSource(newSource.toMap());
+                    List<String> tupleEndpoint = ctrlEndpoint.text.split(":");
+                    newMachine.ipAddress = tupleEndpoint[0];
+                    newMachine.tcpPort = tupleEndpoint.length > 1 ? int.parse(tupleEndpoint[1]) : 4370;
                     dbConn.createMachine(newMachine.toMap());
                     break;
                   default:
