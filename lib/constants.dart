@@ -32,3 +32,13 @@ enum SourceTypeModel {
   final String code;
   final String name;
 }
+
+enum MachineBrandname {
+  unknown("unknown", "---Select---"),
+  zkteco("zkteco", "ZKTeco"),
+  ronaldjack("ronaldjack", "Ronald Jack");
+
+  const MachineBrandname(this.value, this.name);
+  final String value;
+  final String name;
+}
