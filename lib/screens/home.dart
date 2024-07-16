@@ -5,6 +5,7 @@ import 'faq.dart';
 import 'records.dart';
 import '../components.dart';
 import '../constants.dart';
+import '../utils/database.dart';
 
 class Home extends StatefulWidget {
   const Home({
@@ -13,10 +14,12 @@ class Home extends StatefulWidget {
     required this.colorSelected,
     required this.handleBrightnessChange,
     required this.handleColorSelect,
+    required this.dbConnection,
   });
 
   final bool useLightMode;
   final ColorSeed colorSelected;
+  final Batt247Database dbConnection;
 
   final void Function(bool useLightMode) handleBrightnessChange;
   final void Function(int value) handleColorSelect;
@@ -43,7 +46,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
     railAnimation = CurvedAnimation(
       parent: controller,
-      curve: const Interval(0.5, 1.0),
+      curve: const Interval(0.0, 0.5),
     );
   }
 
@@ -82,7 +85,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget createScreenFor(ScreenSelected screenSelected,) => switch (screenSelected) {
     ScreenSelected.home => const HomeScreen(),
-    ScreenSelected.sources => const SourceScreen(),
+    ScreenSelected.sources => SourceScreen(dbConn: widget.dbConnection),
     ScreenSelected.records => const RecordScreen(),
     ScreenSelected.helps => const FaqScreen(),
   };

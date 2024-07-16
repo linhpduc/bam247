@@ -7,19 +7,20 @@ import 'package:uuid/uuid.dart';
 import '../components.dart';
 import '../models/sources.dart';
 import '../utils/database.dart';
+import '../mcc/zk/client.dart';
 
 var uuid = const Uuid();
 enum ActionMenu { resync, edit, remove }
 
 class SourceScreen extends StatefulWidget {
-  const SourceScreen({super.key});
+  const SourceScreen({super.key, required this.dbConn});
+  final Batt247Database dbConn;
 
   @override
   State<SourceScreen> createState() => _SourceScreenState();
 }
 
 class _SourceScreenState extends State<SourceScreen> {
-  Batt247Database dbConn = Batt247Database.instance;
 
   List<SourceModel> sources = [];
   String filterName = '';
@@ -32,11 +33,6 @@ class _SourceScreenState extends State<SourceScreen> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    dbConn.close();
-    super.dispose();
-  }
 
   void filterSourceByName(String name) { 
     setState(() { 
@@ -49,7 +45,7 @@ class _SourceScreenState extends State<SourceScreen> {
 
   void refreshSource() {
     setState(() {
-      dbConn.readAllSource().then((items) {
+      widget.dbConn.readAllSource().then((items) {
         setState(() {
           filteredSources = items;
           sources = items;
@@ -82,10 +78,12 @@ class _SourceScreenState extends State<SourceScreen> {
       context: context, 
       builder: (BuildContext context) {
         var ctrlName = TextEditingController();
+        var ctrlDescription = TextEditingController();
         var ctrlTCPConnection = TextEditingController();
         var ctrlClientEndpoint = TextEditingController();
         var ctrlClientID = TextEditingController();
         var ctrlClientSecret = TextEditingController();
+        var connStatus = true;
         return AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.onSecondary,
           scrollable: true,
@@ -101,15 +99,25 @@ class _SourceScreenState extends State<SourceScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          const Text("Connection info"),
+                          const Text("Connection properties"),
                           divider,
                           TextFormField(
                             controller: ctrlName,
                             decoration: const InputDecoration(
-                              labelText: "Display Name*",
+                              labelText: "Display name*",
                               hintText: 'E.g: Headquarter office',
                               border: OutlineInputBorder(),
-                              // isDense: true,
+                            ),
+                          ),
+                          divider,
+                          TextField(
+                            controller: ctrlDescription,
+                            maxLines: 3,
+                            maxLength: 255,
+                            decoration: const InputDecoration(
+                              labelText: "Description",
+                              hintText: 'Enter the description about the source to collect attendance records.',
+                              border: OutlineInputBorder(),
                             ),
                           ),
                           divider,
@@ -146,21 +154,24 @@ class _SourceScreenState extends State<SourceScreen> {
                           TextFormField(
                             controller: ctrlTCPConnection,
                             decoration: const InputDecoration(
-                              labelText: "Connection IP Address*",
+                              labelText: "Machine's IP address*",
                               hintText: 'E.g: 192.168.1.1:4370',
                               border: OutlineInputBorder(),
-                              // isDense: true,
                             ),
                           ),
                           divider,
                           Row(
                             children: [
                               FilledButton.tonal(
-                                onPressed: (){}, 
+                                onPressed: (){
+                                  setState(() {
+                                    connStatus = true;
+                                  });
+                                }, 
                                 child: const Text("Test connection")
                               ),
-                              const Expanded(
-                                child: Icon(Icons.done),
+                              Expanded(
+                                child: connStatus ? const Icon(Icons.done, color: Colors.green,) : const Icon(Icons.error_outline, color: Colors.red,),
                               ),
                             ],
                           ),
@@ -178,12 +189,15 @@ class _SourceScreenState extends State<SourceScreen> {
                         children: <Widget>[
                           const Text("Synchronizing configurations (Base Checkin)"),
                           divider,
-                          TextFormField(
-                            controller: ctrlClientEndpoint,
-                            decoration: const InputDecoration(
-                              prefix: Text("https://"),
-                              labelText: "Client Endpoint",
-                              border: OutlineInputBorder(),
+                          SizedBox(
+                            width: 300,
+                            child: TextFormField(
+                              controller: ctrlClientEndpoint,
+                              decoration: const InputDecoration(
+                                prefix: Text("https://"),
+                                labelText: "Client Endpoint",
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                           ),
                           divider,
@@ -196,6 +210,7 @@ class _SourceScreenState extends State<SourceScreen> {
                           ),
                           divider,
                           TextFormField(
+                            obscureText: true,
                             controller: ctrlClientSecret,
                             decoration: const InputDecoration(
                               labelText: "Client Secret",
@@ -239,16 +254,17 @@ class _SourceScreenState extends State<SourceScreen> {
               child: const Text('Create'),
               onPressed: () {
                 newSource.name = ctrlName.text;
+                newSource.description = ctrlDescription.text;
                 newSource.clientEndpoint = ctrlClientEndpoint.text;
                 newSource.clientId = ctrlClientID.text;
                 newSource.clientSecret = ctrlClientSecret.text;
+                widget.dbConn.createSource(newSource.toMap());
                 switch (newSource.typeCode) {
                   case SourceTypeModel.machine:
-                    dbConn.createSource(newSource.toMap());
                     List<String> tupleEndpoint = ctrlTCPConnection.text.split(":");
                     newMachine.ipAddress = tupleEndpoint[0];
                     newMachine.tcpPort = tupleEndpoint.length > 1 ? int.parse(tupleEndpoint[1]) : 4370;
-                    dbConn.createMachine(newMachine.toMap());
+                    widget.dbConn.createMachine(newMachine.toMap());
                     break;
                   default:
                 }
@@ -281,12 +297,17 @@ class _SourceScreenState extends State<SourceScreen> {
                 divider,
                 Row(
                   children: <Widget>[
-                    Expanded(
+                    SizedBox(
+                      width: 360,
                       child: TextField(
-                        decoration: const InputDecoration(labelText: 'Filter by source name'),
+                        decoration: const InputDecoration(
+                          labelText: 'Filter by source name',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: filterSourceByName,
                       ),
                     ),
+                    Expanded(child: Container()),
                     FilledButton.icon(
                       onPressed: () async => await _dialogNewSource(context),
                       icon: const Icon(Icons.add),
@@ -304,14 +325,18 @@ class _SourceScreenState extends State<SourceScreen> {
                         shrinkWrap: true,
                         itemCount: filteredSources.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return SourceItem(info: filteredSources[index], dbConn: dbConn, handleUpdateParentWidget: refreshSource,);
+                          return SourceItem(
+                            info: filteredSources[index], 
+                            dbConn: widget.dbConn, 
+                            handleUpdateParentWidget: refreshSource,
+                          );
                         },
                         separatorBuilder: (BuildContext context, int index) => const Divider(),
                       )
                       : const ListTile(
                         titleAlignment: ListTileTitleAlignment.center,
-                        leading: Icon(Icons.sentiment_very_dissatisfied),
-                        title: Text("No record to display."),
+                        leading: Icon(Icons.search_off),
+                        title: Text("No sources found."),
                       ),
                   ),
                 ),
@@ -335,77 +360,87 @@ class SourceItem extends StatefulWidget {
 }
 
 class _SourceItemState extends State<SourceItem> {
+  bool connStatus = false;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.devices_fold_outlined),
       title: Text(widget.info.name),
-      subtitle: Text(join(widget.info.description??"", widget.info.clientEndpoint??"", widget.info.clientId??"", widget.info.clientSecret??"", widget.info.createdTime?.toString())),
-      trailing: PopupMenuButton<ActionMenu>(
-        color: Theme.of(context).colorScheme.onSecondary,
-        onSelected: (ActionMenu? action) {
-          switch (action) {
-            case ActionMenu.remove:
-              showDialog(
-                context: context, 
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text("Warning"),
-                    content: const Text("Do you want to remove this source?"),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(context, "Cancel"), child: const Text("Cancel")),
-                      FilledButton(
-                        onPressed: () {
-                          widget.dbConn.deleteSource(widget.info.sourceId);
-                          switch (widget.info.typeCode) {
-                            case SourceTypeModel.machine:
-                              widget.dbConn.deleteMachine(widget.info.sourceId);
-                              break;
-                            default:
-                          }
-                          Navigator.pop(context, "Remove");
-                        }, 
-                        child: const Text("Remove")),
-                    ],
-                  );
-                },
-              ).then((_) {
-                widget.handleUpdateParentWidget();
-              });
-              break;
-            default:
-          }
-        },
-        itemBuilder: (BuildContext context) =>
-            <PopupMenuEntry<ActionMenu>>[
-          PopupMenuItem<ActionMenu>(
-            value: ActionMenu.resync,
-            child: ListTile(
-              iconColor: Theme.of(context).colorScheme.secondary,
-              textColor: Theme.of(context).colorScheme.secondary,
-              leading: const Icon(Icons.sync,),
-              title: const Text('Resync'),
-            ),
-          ),
-          PopupMenuItem<ActionMenu>(
-            value: ActionMenu.edit,
-            child: ListTile(
-              iconColor: Theme.of(context).colorScheme.secondary,
-              textColor: Theme.of(context).colorScheme.secondary,
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit'),
-            ),
-          ),
-          const PopupMenuDivider(),
-          PopupMenuItem<ActionMenu>(
-            value: ActionMenu.remove,
-            child: ListTile(
-              iconColor: Theme.of(context).colorScheme.error,
-              textColor: Theme.of(context).colorScheme.error,
-              leading: const Icon(Icons.delete_forever),
-              title: const Text('Remove'),
-            ),
+      subtitle: Text("${widget.info.description}"),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          connStatus ? const Icon(Icons.check_circle, color: Colors.green) : const Icon(Icons.sync_problem, color: Colors.red),
+          const SizedBox(width: 15),
+          PopupMenuButton<ActionMenu>(
+            tooltip: "Actions",
+            color: Theme.of(context).colorScheme.onSecondary,
+            onSelected: (ActionMenu? action) {
+              switch (action) {
+                case ActionMenu.remove:
+                  showDialog(
+                    context: context, 
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Warning"),
+                        content: Text("Do you want to remove ${widget.info.name}?"),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(context, "Cancel"), child: const Text("Cancel")),
+                          TextButton(
+                            onPressed: () {
+                              widget.dbConn.deleteSource(widget.info.sourceId);
+                              switch (widget.info.typeCode) {
+                                case SourceTypeModel.machine:
+                                  widget.dbConn.deleteMachine(widget.info.sourceId);
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Removed"), width: 400.0, behavior: SnackBarBehavior.floating,));
+                                  break;
+                                default:
+                              }
+                              Navigator.pop(context, "Remove");
+                            }, 
+                            child: const Text("Remove")),
+                        ],
+                      );
+                    },
+                  ).then((_) {
+                    widget.handleUpdateParentWidget();
+                  });
+                  break;
+                default:
+              }
+            },
+            itemBuilder: (BuildContext context) =>
+                <PopupMenuEntry<ActionMenu>>[
+              PopupMenuItem<ActionMenu>(
+                value: ActionMenu.resync,
+                child: ListTile(
+                  iconColor: Theme.of(context).colorScheme.secondary,
+                  textColor: Theme.of(context).colorScheme.secondary,
+                  leading: const Icon(Icons.sync,),
+                  title: const Text('Resync'),
+                ),
+              ),
+              PopupMenuItem<ActionMenu>(
+                value: ActionMenu.edit,
+                child: ListTile(
+                  iconColor: Theme.of(context).colorScheme.secondary,
+                  textColor: Theme.of(context).colorScheme.secondary,
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Edit'),
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem<ActionMenu>(
+                value: ActionMenu.remove,
+                child: ListTile(
+                  iconColor: Theme.of(context).colorScheme.error,
+                  textColor: Theme.of(context).colorScheme.error,
+                  leading: const Icon(Icons.delete_forever),
+                  title: const Text('Remove'),
+                ),
+              ),
+            ],
           ),
         ],
       ),

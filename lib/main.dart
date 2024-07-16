@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'constants.dart';
 import 'screens/home.dart';
+import 'utils/database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,12 +20,19 @@ class _AppState extends State<App> {
   bool useMaterial3 = true;
   ThemeMode themeMode = ThemeMode.system;
   ColorSeed colorSelected = ColorSeed.baseColor;
+  Batt247Database dbConnection = Batt247Database.instance;
 
   bool get useLightMode => switch (themeMode) {
     ThemeMode.system => View.of(context).platformDispatcher.platformBrightness == Brightness.light,
     ThemeMode.light => true,
     ThemeMode.dark => false
   };
+
+  @override
+  void dispose() {
+    dbConnection.close();
+    super.dispose();
+  }
 
   void handleBrightnessChange(bool useLightMode) {
     setState(() {
@@ -42,7 +50,7 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'BAM-247',
+      title: 'BAM247',
       themeMode: themeMode,
       theme: ThemeData(
         brightness: Brightness.light,
@@ -59,6 +67,7 @@ class _AppState extends State<App> {
         colorSelected: colorSelected,
         handleBrightnessChange: handleBrightnessChange,
         handleColorSelect: handleColorSelect,
+        dbConnection: dbConnection,
       ),
     );
   }
