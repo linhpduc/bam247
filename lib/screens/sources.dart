@@ -113,7 +113,7 @@ class _SourceScreenState extends State<SourceScreen> {
                           TextField(
                             controller: ctrlDescription,
                             maxLines: 3,
-                            maxLength: 255,
+                            maxLength: 128,
                             decoration: const InputDecoration(
                               labelText: "Description",
                               hintText: 'Enter the description about the source to collect attendance records.',
@@ -270,7 +270,11 @@ class _SourceScreenState extends State<SourceScreen> {
                 }
                 refreshSource();
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Create successfully"), width: 400.0, behavior: SnackBarBehavior.floating,));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Create successfully"),
+                  width: 400.0, 
+                  behavior: SnackBarBehavior.floating,
+                ));
               },
             ),
           ],
@@ -298,7 +302,7 @@ class _SourceScreenState extends State<SourceScreen> {
                 Row(
                   children: <Widget>[
                     SizedBox(
-                      width: 360,
+                      width: 300,
                       child: TextField(
                         decoration: const InputDecoration(
                           labelText: 'Filter by source name',
@@ -360,7 +364,7 @@ class SourceItem extends StatefulWidget {
 }
 
 class _SourceItemState extends State<SourceItem> {
-  bool connStatus = false;
+  bool connStatus = true;
 
   @override
   Widget build(BuildContext context) {
@@ -371,7 +375,26 @@ class _SourceItemState extends State<SourceItem> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          connStatus ? const Icon(Icons.check_circle, color: Colors.green) : const Icon(Icons.sync_problem, color: Colors.red),
+          connStatus 
+          ? SizedBox(width: 100, child: TextButton.icon(
+            onPressed: (){}, 
+            label: const Text("Ok"), 
+            icon: const Icon(Icons.check_circle), 
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.green, 
+              backgroundColor: Colors.green[50]
+            ),
+          ))
+          : SizedBox(width: 100, child: TextButton.icon(
+            onPressed: (){}, 
+            label: const Text("Error"), 
+            icon: const Icon(Icons.sync_problem), 
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red, 
+              backgroundColor: Colors.red[50],
+              textStyle: Theme.of(context).textTheme.labelSmall,
+            ),
+          )),
           const SizedBox(width: 15),
           PopupMenuButton<ActionMenu>(
             tooltip: "Actions",
@@ -386,7 +409,7 @@ class _SourceItemState extends State<SourceItem> {
                         title: const Text("Warning"),
                         content: Text("Do you want to remove ${widget.info.name}?"),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(context, "Cancel"), child: const Text("Cancel")),
+                          OutlinedButton(onPressed: () => Navigator.pop(context, "Cancel"), autofocus: true, child: const Text("Cancel"),),
                           TextButton(
                             onPressed: () {
                               widget.dbConn.deleteSource(widget.info.sourceId);
@@ -410,8 +433,7 @@ class _SourceItemState extends State<SourceItem> {
                 default:
               }
             },
-            itemBuilder: (BuildContext context) =>
-                <PopupMenuEntry<ActionMenu>>[
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<ActionMenu>>[
               PopupMenuItem<ActionMenu>(
                 value: ActionMenu.resync,
                 child: ListTile(
