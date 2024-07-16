@@ -1,13 +1,11 @@
 import 'package:batt247/constants.dart';
 import 'package:batt247/models/machines.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:uuid/uuid.dart';
 
 import '../components.dart';
 import '../models/sources.dart';
 import '../utils/database.dart';
-import '../mcc/zk/client.dart';
 
 var uuid = const Uuid();
 enum ActionMenu { resync, edit, remove }
