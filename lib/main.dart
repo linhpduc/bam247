@@ -20,7 +20,7 @@ class _AppState extends State<App> {
   bool useMaterial3 = true;
   ThemeMode themeMode = ThemeMode.system;
   ColorSeed colorSelected = ColorSeed.baseColor;
-  Batt247Database dbConnection = Batt247Database.instance;
+  AppDB dbConnection = AppDB.instance;
 
   bool get useLightMode => switch (themeMode) {
     ThemeMode.system => View.of(context).platformDispatcher.platformBrightness == Brightness.light,

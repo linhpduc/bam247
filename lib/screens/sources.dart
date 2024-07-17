@@ -12,7 +12,7 @@ enum ActionMenu { resync, edit, remove }
 
 class SourceScreen extends StatefulWidget {
   const SourceScreen({super.key, required this.dbConn});
-  final Batt247Database dbConn;
+  final AppDB dbConn;
 
   @override
   State<SourceScreen> createState() => _SourceScreenState();
@@ -80,7 +80,7 @@ class _SourceScreenState extends State<SourceScreen> {
         var ctrlClientEndpoint = TextEditingController();
         var ctrlClientID = TextEditingController();
         var ctrlClientSecret = TextEditingController();
-        var connStatus = true;
+        var connStatus = false;
         return AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.onSecondary,
           scrollable: true,
@@ -96,7 +96,7 @@ class _SourceScreenState extends State<SourceScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          const Text("Connection properties"),
+                          Text("Connection properties", style: Theme.of(context).textTheme.bodyMedium,),
                           divider,
                           TextFormField(
                             controller: ctrlName,
@@ -315,7 +315,7 @@ class _SourceScreenState extends State<SourceScreen> {
                 ),
                 divider,
                 Card.filled(
-                  color: Theme.of(context).colorScheme.onSecondary,
+                  color: Theme.of(context).colorScheme.surface,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: filteredSources.isNotEmpty 
@@ -350,7 +350,7 @@ class _SourceScreenState extends State<SourceScreen> {
 class SourceItem extends StatefulWidget {
   const SourceItem({super.key, required this.info, required this.dbConn, required this.handleUpdateParentWidget});
   final SourceModel info;
-  final Batt247Database dbConn;
+  final AppDB dbConn;
   final void Function() handleUpdateParentWidget;
 
   @override

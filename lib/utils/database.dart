@@ -9,9 +9,9 @@ import 'package:batt247/models/machines.dart';
 import 'package:batt247/models/records.dart';
 import 'package:batt247/models/sources.dart';
 
-class Batt247Database {
-  static final Batt247Database instance = Batt247Database._();
-  Batt247Database._();
+class AppDB {
+  static final AppDB instance = AppDB._();
+  AppDB._();
 
   static Database? _database;
 

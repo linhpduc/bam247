@@ -19,7 +19,7 @@ class Home extends StatefulWidget {
 
   final bool useLightMode;
   final ColorSeed colorSelected;
-  final Batt247Database dbConnection;
+  final AppDB dbConnection;
 
   final void Function(bool useLightMode) handleBrightnessChange;
   final void Function(int value) handleColorSelect;
