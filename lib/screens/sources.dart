@@ -21,13 +21,12 @@ class SourceScreen extends StatefulWidget {
 class _SourceScreenState extends State<SourceScreen> {
 
   List<SourceModel> sources = [];
-  String filterName = '';
   List<SourceModel> filteredSources = [];
+  String filterName = '';
 
   @override
   void initState() {
     refreshSource();
-    // filteredSources = sources;
     super.initState();
   }
 
@@ -36,7 +35,7 @@ class _SourceScreenState extends State<SourceScreen> {
     setState(() { 
       filterName = name;
       filteredSources = sources 
-          .where((source) => source.name.contains(filterName)) 
+          .where((source) => source.name.toLowerCase().contains(filterName.toLowerCase())) 
           .toList(); 
     }); 
   }
@@ -287,15 +286,12 @@ class _SourceScreenState extends State<SourceScreen> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Text(
-                  'Sources',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text('Sources', style: Theme.of(context).textTheme.titleMedium),
                 divider,
                 Row(
                   children: <Widget>[
@@ -303,7 +299,7 @@ class _SourceScreenState extends State<SourceScreen> {
                       width: 300,
                       child: TextField(
                         decoration: const InputDecoration(
-                          labelText: 'Filter by source name',
+                          labelText: 'Filter by name',
                           border: OutlineInputBorder(),
                         ),
                         onChanged: filterSourceByName,
