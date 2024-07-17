@@ -159,13 +159,23 @@ class _NavigationTransitionState extends State<NavigationTransition> {
 
     return Scaffold(
       key: widget.scaffoldKey,
+      backgroundColor: colorScheme.onSecondary,
+      bottomSheet: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Build version: 202407.171014", style: Theme.of(context).textTheme.bodySmall,),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             RailTransition(
               animation: railAnimation,
-              backgroundColor: colorScheme.surface,
+              backgroundColor: colorScheme.onPrimaryContainer,
               child: widget.navigationRail,
             ),
             widget.body,
