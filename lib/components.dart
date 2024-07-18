@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'constants.dart';
+import 'utils/network.dart';
 
 
 // Navigation
@@ -142,21 +146,42 @@ class NavigationTransition extends StatefulWidget {
 class _NavigationTransitionState extends State<NavigationTransition> {
   late final AnimationController controller;
   late final CurvedAnimation railAnimation;
+  final NetworkBloc _networkBloc = NetworkBloc();
+
   bool controllerInitialized = false;
   bool showDivider = false;
+  
+  void handleNetworkChecking(timer) async {
+    _networkBloc.eventSink.add(ConnectingNetworkEvent());
+    bool status = await isInternetConnected();
+    if (status) {
+      _networkBloc.eventSink.add(ConnectedNetworkEvent());
+    } else {
+      _networkBloc.eventSink.add(DisconnectedNetworkEvent());
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-
     controller = widget.animationController;
     railAnimation = widget.railAnimation;
+    _networkBloc.eventSink.add(ConnectingNetworkEvent());
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      Timer.periodic(const Duration(seconds: 10), handleNetworkChecking);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _networkBloc.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
+    
     return Scaffold(
       key: widget.scaffoldKey,
       backgroundColor: colorScheme.onSecondary,
@@ -166,6 +191,33 @@ class _NavigationTransitionState extends State<NavigationTransition> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("Build version: 202407.171014", style: Theme.of(context).textTheme.bodySmall,),
+            const SizedBox(width: 20,),
+            StreamBuilder<NetworkState>(
+              stream: _networkBloc.currentStatus,
+              initialData: NetworkState.initial(),
+              builder: (BuildContext context, AsyncSnapshot<NetworkState> snapshot) {
+                if (snapshot.data?.currentStatus == "connected") {
+                  return const Tooltip(
+                    message: "Network connected", 
+                    child: Icon(Icons.wifi, size: 16, color: Colors.green,),
+                  );
+                  
+                } else if (snapshot.data?.currentStatus == "disconnected") {
+                  return const Tooltip(
+                    message: "No internet access", 
+                    child: Icon(Icons.wifi_off, size: 16, color: Colors.grey,),
+                  );
+                } else {
+                  return SizedBox(
+                    width: 10, height: 10, 
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  );     
+                }
+              }
+            ),
           ],
         ),
       ),
@@ -237,7 +289,6 @@ class ColorSeedButton extends StatelessWidget {
       itemBuilder: (context) {
         return List.generate(ColorSeed.values.length, (index) {
           ColorSeed currentColor = ColorSeed.values[index];
-
           return PopupMenuItem(
             value: index,
             enabled: currentColor != colorSelected,
