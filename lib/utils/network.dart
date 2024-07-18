@@ -1,15 +1,34 @@
 import 'dart:async';
 import 'dart:io';
 
-Future<bool> isInternetConnected() async {
-  try {
-    final result = await InternetAddress.lookup('checkin.base.vn');
-    var res = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    return res;
-  } on SocketException catch (_) {
-    return false;
+class Networkk {
+  static Future<bool> isInternetConnected() async {
+    try {
+      final result = await InternetAddress.lookup('checkin.base.vn');
+      var res = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      return res;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> tcpPortScan(String host, int port) async {
+    int connectionTimeout = 1;
+    Socket? connection;
+    try {
+      connection = await Socket.connect(host, port, timeout: Duration(seconds: connectionTimeout));
+      return true;
+    } catch (e) {
+      return false;
+    } finally {
+      if (connection != null) {
+        connection.destroy();
+      }
+    }
   }
 }
+
+
 
 abstract class NetworkEvent {}
 class ConnectingNetworkEvent implements NetworkEvent {}
