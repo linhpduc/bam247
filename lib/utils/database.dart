@@ -36,7 +36,7 @@ class AppDB {
 
   Future<void> _createDatabase(Database db, _) async {
     return await db.execute('''
-      CREATE TABLE ${SourceModel.tableName}(
+      CREATE TABLE IF NOT EXISTS ${SourceModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         source_id CHARACTER(36),
         type_code VARCHAR(32),
@@ -49,7 +49,7 @@ class AppDB {
         client_secret TEXT,
         created_time INT
       );
-      CREATE TABLE ${MachineModel.tableName}(
+      CREATE TABLE IF NOT EXISTS ${MachineModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         source_id CHARACTER(36),
         brandname VARCHAR(64),
@@ -58,7 +58,7 @@ class AppDB {
         realtime_capturable INT,
         metadata TEXT
       );
-      CREATE TABLE ${RecordModel.tableName}(
+      CREATE TABLE IF NOT EXISTS ${RecordModel.tableName}(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         record_id CHARACTER(36),
         source_id CHARACTER(36),
