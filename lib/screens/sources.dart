@@ -1,5 +1,7 @@
 import 'package:batt247/constants.dart';
 import 'package:batt247/models/machines.dart';
+
+import 'package:batt247/utils/network.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -159,10 +161,16 @@ class _SourceScreenState extends State<SourceScreen> {
                           divider,
                           Row(
                             children: [
-                              FilledButton.tonal(
-                                onPressed: (){
-                                  setState(() {
-                                    connStatus = true;
+                              OutlinedButton(
+                                onPressed: () async {
+                                  print("port checking");
+                                  List<String> tupleEndpoint = ctrlTCPConnection.text.split(":");
+                                  String host = tupleEndpoint[0];
+                                  int port = tupleEndpoint.length > 1 ? int.parse(tupleEndpoint[1]) : 4370;
+                                  bool isOpened =  await Networkk.tcpPortScan(host, port);
+                                  setState(() {                   
+                                    connStatus = isOpened;  
+                                    print("port is opened: $isOpened");               
                                   });
                                 }, 
                                 child: const Text("Test connection")

@@ -15,10 +15,13 @@ class Networkk {
   static Future<bool> tcpPortScan(String host, int port) async {
     int connectionTimeout = 1;
     Socket? connection;
+    print("$host:$port");
     try {
-      connection = await Socket.connect(host, port, timeout: Duration(seconds: connectionTimeout));
+      connection = await Socket.connect(host, port,
+          timeout: Duration(seconds: connectionTimeout));
       return true;
     } catch (e) {
+      print(e);
       return false;
     } finally {
       if (connection != null) {
@@ -28,11 +31,12 @@ class Networkk {
   }
 }
 
-
-
 abstract class NetworkEvent {}
+
 class ConnectingNetworkEvent implements NetworkEvent {}
+
 class ConnectedNetworkEvent implements NetworkEvent {}
+
 class DisconnectedNetworkEvent implements NetworkEvent {}
 
 class NetworkState {
@@ -47,7 +51,7 @@ class NetworkBloc {
 
   final _eventController = StreamController<NetworkEvent>();
   Sink<NetworkEvent> get eventSink => _eventController.sink;
-  
+
   final _stateController = StreamController<NetworkState>();
   StreamSink<NetworkState> get _stateSink => _stateController.sink;
   Stream<NetworkState> get currentStatus => _stateController.stream;
