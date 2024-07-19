@@ -153,7 +153,7 @@ class _NavigationTransitionState extends State<NavigationTransition> {
   
   void handleNetworkChecking(timer) async {
     _networkBloc.eventSink.add(ConnectingNetworkEvent());
-    bool status = await Networkk.isInternetConnected();
+    bool status = await Networkk.testInternet();
     if (status) {
       _networkBloc.eventSink.add(ConnectedNetworkEvent());
     } else {

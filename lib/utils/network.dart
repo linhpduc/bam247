@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 class Networkk {
-  static Future<bool> isInternetConnected() async {
+  static Future<bool> testInternet() async {
     try {
       final result = await InternetAddress.lookup('checkin.base.vn');
       var res = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
@@ -12,16 +12,13 @@ class Networkk {
     }
   }
 
-  static Future<bool> tcpPortScan(String host, int port) async {
+  static Future<bool> testTcp(String host, int port) async {
     int connectionTimeout = 1;
     Socket? connection;
-    print("$host:$port");
     try {
-      connection = await Socket.connect(host, port,
-          timeout: Duration(seconds: connectionTimeout));
+      connection = await Socket.connect(host, port, timeout: Duration(seconds: connectionTimeout));
       return true;
     } catch (e) {
-      print(e);
       return false;
     } finally {
       if (connection != null) {

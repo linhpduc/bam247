@@ -167,7 +167,7 @@ class _SourceScreenState extends State<SourceScreen> {
                                   List<String> tupleEndpoint = ctrlTCPConnection.text.split(":");
                                   String host = tupleEndpoint[0];
                                   int port = tupleEndpoint.length > 1 ? int.parse(tupleEndpoint[1]) : 4370;
-                                  bool isOpened =  await Networkk.tcpPortScan(host, port);
+                                  bool isOpened =  await Networkk.testTcp(host, port);
                                   setState(() {                   
                                     connStatus = isOpened;  
                                     print("port is opened: $isOpened");               
