@@ -20,9 +20,9 @@ class ZK {
       cmdCode: command, 
       sessionID: sessionID, 
       replyID: replyID, 
-      data: data,
+      data: data ?? Uint8List(0),
     );
-    print(pkt);
+    print('Send: $pkt');
     _counter++;
     socket.add(pkt.toBytes());
   }
@@ -81,15 +81,14 @@ class ZK {
     return kBytes;
   }
 
-  Future<void> getDeviceInfo() async {
-    Socket socket = await Socket.connect(ip, port, timeout: const Duration(seconds: 1)); print("address: $ip:$port");
-    await Future.delayed(const Duration(seconds: 1), () => {print("ok")});
+  void getDeviceInfo() {
     List<String> infos = <String>['~SerialNumber', '~Platform', '~MAC', '~ZKFaceVersion', '~ZKFPVersion', '~DeviceName'];
-    try {
-      connect(socket);
+    Socket.connect(ip, port, timeout: const Duration(seconds: 1)).then((socket) {
+      print("Connected: $ip:$port");
       socket.listen(
         (data) {
-          ZKPacket respkt = ZKPacket.fromBytes(data); print("Receive: $respkt");
+          ZKPacket respkt = ZKPacket.fromBytes(data); 
+          print("Recv: $respkt");
           switch (respkt.cmdCode) {
             case ZKCMD.repNotAuth:
               auth(socket, respkt.sessionID, respkt.replyID);
@@ -114,32 +113,28 @@ class ZK {
           socket.destroy();
         }
       );
-    } catch (e) {
-      print("Error: $e");
-      socket.close();
-    }
+      connect(socket);
+    });
   }
 
 }
 
 class ZKPacket {
-  final int headIndicator;
   late int payloadSz;
   int cmdCode;
   late int checksum;
   int sessionID;
   int replyID;
-  Uint8List? data;
+  Uint8List data;
 
   ZKPacket({
-    this.headIndicator = 0x7d825050,
     required this.cmdCode,
     required this.sessionID,
     required this.replyID,
     required this.data,
   }) {
-    payloadSz = 0x08 + (data ?? Uint8List(0)).length;
-    checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...(data ?? Uint8List(0))]);
+    payloadSz = 0x08 + data.length;
+    checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...data]);
   }
 
   factory ZKPacket.fromBytes(Uint8List packet) => ZKPacket(
@@ -150,18 +145,18 @@ class ZKPacket {
   );
 
   Uint8List toBytes() {
-    int checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...data ?? []]);
+    // int checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...data ?? []]);
     Uint8List packet = Uint8List.fromList([
-      ...Helper.packInt(headIndicator), 
+      ...ZKCMD.indicator, 
       ...Helper.packInt(payloadSz), 
       ...Helper.packUShort(cmdCode), 
       ...Helper.packUShort(checksum), 
       ...[sessionID % (1<<8), sessionID>>8], 
       ...[replyID % (1<<8), replyID>>8],
+      ...data,
     ]);
-    if (data != null) {
-      packet = Uint8List.fromList([...packet, ...(data ?? Uint8List(0))]);
-    }
+    checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...data]);
+    packet.setRange(10, 12, Helper.packUShort(checksum));
     return packet;
   }
 
@@ -193,13 +188,13 @@ class ZKPacket {
 }
 
 class ZKCMD {
-  static const startTag = [0x50, 0x50, 0x82, 0x7D];
+  static const indicator = [0x50, 0x50, 0x82, 0x7D];
 
   static const connect = 0x03e8;          // 1000
   static const disconnect = 0x03e9;       // 1101
   static const auth = 0x044e;             // 1102
   static const readConfig = 0x000b;       // 11
-  
+
   static const cmdData = 0x05dd;          // 1501
   static const cmdPrepareData = 0x05dc;
   static const cmdDataRdy = 0x05e0;
