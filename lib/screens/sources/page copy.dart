@@ -1,3 +1,5 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:batt247/constants.dart';
 import 'package:batt247/models/machines.dart';
 
@@ -5,9 +7,9 @@ import 'package:batt247/utils/network.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-import '../components.dart';
-import '../models/sources.dart';
-import '../utils/database.dart';
+import 'package:batt247/components.dart';
+import 'package:batt247/models/sources.dart';
+import 'package:batt247/utils/database.dart';
 
 var uuid = const Uuid();
 enum ActionMenu { resync, edit, remove }
@@ -33,13 +35,13 @@ class _SourceScreenState extends State<SourceScreen> {
   }
 
 
-  void filterSourceByName(String name) { 
-    setState(() { 
+  void filterSourceByName(String name) {
+    setState(() {
       filterName = name;
-      filteredSources = sources 
+      filteredSources = sources
           .where((source) => source.name.toLowerCase().contains(filterName.toLowerCase())) 
-          .toList(); 
-    }); 
+          .toList();
+    });
   }
 
   void refreshSource() {
@@ -299,7 +301,7 @@ class _SourceScreenState extends State<SourceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Text('Sources', style: Theme.of(context).textTheme.titleMedium),
+                Text(AppLocalizations.of(context)!.data_sources, style: Theme.of(context).textTheme.titleMedium),
                 divider,
                 Row(
                   children: <Widget>[

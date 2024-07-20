@@ -14,11 +14,17 @@ dependencies:
   sqflite: ^2.3.3+1
   uuid: ^4.4.2
   sqflite_common_ffi: ^2.3.3
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
 flutter:
+  generate: true # Add this line
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
   # assets:

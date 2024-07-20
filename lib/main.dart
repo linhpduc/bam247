@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'constants.dart';
 import 'screens/home.dart';
@@ -51,6 +53,17 @@ class _AppState extends State<App> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'BAM247',
+      locale: const Locale('vi'), // Ngôn ngữ mặc định
+      supportedLocales: const [
+        Locale('en', ''), // English
+        Locale('vi', ''), // Vietnamese
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       themeMode: themeMode,
       theme: ThemeData(
         brightness: Brightness.light,
