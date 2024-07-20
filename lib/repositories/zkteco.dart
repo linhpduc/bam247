@@ -1,59 +1,50 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import '../utils/helper.dart';
 
 class ZK {
   static const int uShrtMAX = 65535;
 
-  final String ip = "";
-  final int port = 4370;
-  final int password = 0;
+  String ip;
+  int port;
+  int password;
+  late int _counter;
 
-  Socket? _socket;
-  int _cmdID = 0;
-  int _sessionID = 0;
-  int _lastReplyID = 0;
-  bool _isConnect = false;
-
-  ZK({required ip, required int port, password = 0}) {
-    this.ip;
-    this.port;
+  ZK({required this.ip, this.port = 4370, this.password = 0}) {
+    _counter = 0;
   }
 
-  Uint8List _createPacket(int cmdCode, {Uint8List? data}) {
-    _lastReplyID++;
-    var zkPacket = Uint8List.fromList([0x50, 0x50, 0x82, 0x7D]);
-    zkPacket = Uint8List.fromList([...zkPacket, ...Uint8List.fromList([0x00, 0x00])]);
-    zkPacket = Uint8List.fromList([...zkPacket, ...Uint8List.fromList([0x00, 0x00])]);
-    zkPacket = Uint8List.fromList([...zkPacket, ...Helper.packUShort(cmdCode)]);
-    zkPacket = Uint8List.fromList([...zkPacket, ...Uint8List.fromList([0x00, 0x00])]);
-    zkPacket = Uint8List.fromList([...zkPacket, ...[_sessionID % (1<<8), _sessionID>>8]]);
-    zkPacket = Uint8List.fromList([...zkPacket, ...[_lastReplyID % (1<<8), _lastReplyID>>8]]);
-    if (data != null) {
-      zkPacket = Uint8List.fromList([...zkPacket, ...data]);
-    }
-    var sizeField = ByteData(2)..setUint16(0, zkPacket.length - 8, Endian.little);
-    zkPacket.setRange(4, 6, sizeField.buffer.asUint8List());
-    var checksum = _checksum16(zkPacket.sublist(8));
-    zkPacket.setRange(10, 12, Helper.packUShort(checksum));
-    return zkPacket;
+  void __sendCommand(Socket socket, int command, int sessionID, int replyID, {Uint8List? data}) {
+    ZKPacket pkt = ZKPacket(
+      cmdCode: command, 
+      sessionID: sessionID, 
+      replyID: replyID, 
+      data: data,
+    );
+    print(pkt);
+    _counter++;
+    socket.add(pkt.toBytes());
   }
 
-  void _sendPacket(Uint8List packet) {
-    _socket?.add(packet);
+  void connect(socket) {
+    __sendCommand(socket, ZKCMD.connect, 0, 0);
   }
 
-  void _sendCmd(int cmd, {Uint8List? data}) {
-    _sendPacket(_createPacket(cmd, data: data));
+  void disconnect(socket, int sessionID, int replyID) {
+    replyID++;
+    __sendCommand(socket, ZKCMD.disconnect, sessionID, replyID);
   }
 
-  bool _parseAns(Uint8List replyData) {
-    _cmdID = ByteData.sublistView(replyData, 8, 10).getUint16(0, Endian.little);
-    _sessionID = ByteData.sublistView(replyData, 12, 14).getUint16(0, Endian.little);
-    _lastReplyID = ByteData.sublistView(replyData, 14, 16).getUint16(0, Endian.little);
-    // payloadData = replyData.sublist(16);
-    return true;
+  void auth(Socket socket, int sessionID, int replyID) {
+    replyID++;
+    __sendCommand(socket, ZKCMD.auth, sessionID, replyID, data: _makeCmdKey(password, sessionID));
+  }
+
+  void readInfo(Socket socket, int sessionID, int replyID, String confName) {
+    replyID++;
+    Uint8List data = Uint8List.fromList([...confName.runes, 0x00]);
+    __sendCommand(socket, ZKCMD.readConfig, sessionID, replyID, data: data);
   }
 
   Uint8List _makeCmdKey(int key, int sessionId, {int ticks = 50}) {
@@ -90,7 +81,96 @@ class ZK {
     return kBytes;
   }
 
-  int _checksum16(List<int> payload) {
+  Future<void> getDeviceInfo() async {
+    Socket socket = await Socket.connect(ip, port, timeout: const Duration(seconds: 1)); print("address: $ip:$port");
+    await Future.delayed(const Duration(seconds: 1), () => {print("ok")});
+    List<String> infos = <String>['~SerialNumber', '~Platform', '~MAC', '~ZKFaceVersion', '~ZKFPVersion', '~DeviceName'];
+    try {
+      connect(socket);
+      socket.listen(
+        (data) {
+          ZKPacket respkt = ZKPacket.fromBytes(data); print("Receive: $respkt");
+          switch (respkt.cmdCode) {
+            case ZKCMD.repNotAuth:
+              auth(socket, respkt.sessionID, respkt.replyID);
+              break;
+            case ZKCMD.repSuccess:
+              if (infos.isNotEmpty) {
+                String confName = infos.removeLast();
+                readInfo(socket, respkt.sessionID, respkt.replyID, confName);
+              } else {
+                disconnect(socket, respkt.sessionID, respkt.replyID);
+              }
+              break;
+            default:
+          }
+        },
+        onDone: () {
+          print('Done.');
+          socket.destroy();
+        },
+        onError: (error) {
+          print('Error: $error');
+          socket.destroy();
+        }
+      );
+    } catch (e) {
+      print("Error: $e");
+      socket.close();
+    }
+  }
+
+}
+
+class ZKPacket {
+  final int headIndicator;
+  late int payloadSz;
+  int cmdCode;
+  late int checksum;
+  int sessionID;
+  int replyID;
+  Uint8List? data;
+
+  ZKPacket({
+    this.headIndicator = 0x7d825050,
+    required this.cmdCode,
+    required this.sessionID,
+    required this.replyID,
+    required this.data,
+  }) {
+    payloadSz = 0x08 + (data ?? Uint8List(0)).length;
+    checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...(data ?? Uint8List(0))]);
+  }
+
+  factory ZKPacket.fromBytes(Uint8List packet) => ZKPacket(
+    cmdCode: ByteData.sublistView(packet, 8, 10).getUint16(0, Endian.little),
+    sessionID: ByteData.sublistView(packet, 12, 14).getUint16(0, Endian.little),
+    replyID: ByteData.sublistView(packet, 14, 16).getUint16(0, Endian.little),
+    data: packet.sublist(16),
+  );
+
+  Uint8List toBytes() {
+    int checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...data ?? []]);
+    Uint8List packet = Uint8List.fromList([
+      ...Helper.packInt(headIndicator), 
+      ...Helper.packInt(payloadSz), 
+      ...Helper.packUShort(cmdCode), 
+      ...Helper.packUShort(checksum), 
+      ...[sessionID % (1<<8), sessionID>>8], 
+      ...[replyID % (1<<8), replyID>>8],
+    ]);
+    if (data != null) {
+      packet = Uint8List.fromList([...packet, ...(data ?? Uint8List(0))]);
+    }
+    return packet;
+  }
+
+  @override
+  String toString() {
+    return 'ZKPacket{cmdCode: $cmdCode, sessionID: $sessionID, replyIDNumber: $replyID, data: $data}';
+  }
+
+  int _calcCheckSum16(List<int> payload) {
     int chk32b = 0;
     int j = 1;
 
@@ -109,63 +189,26 @@ class ZK {
 
     return chk16b;
   }
-
-  Future<void> connect() async {
-    try {
-      _socket = await Socket.connect("10.20.1.217", 4370, timeout: const Duration(seconds: 1));
-      print("address: $ip:$port");
-
-      _sendCmd(DEFS.cmdConnect);
-
-      _socket?.listen(
-        (data) {
-          _parseAns(data);
-          if (_cmdID == DEFS.repNotAuth) {
-            _sendCmd(DEFS.cmdAuth, data: _makeCmdKey(password, _sessionID));
-          } else if (_cmdID == DEFS.cmdAckOk) {
-            _isConnect = true;
-          }
-        },
-        onDone: () {
-          _socket?.destroy();
-        },
-        onError: (error) {
-          print('Error: $error');
-          _socket?.destroy();
-        }
-      );
-    } catch (e) {
-      print("Error: $e");
-      _socket?.close();
-    }
-  }
-
-  void testVoice({int index = 0}) {
-    _sendCmd(DEFS.testVoice, data: Helper.packInt(index));
-  }
-
-  bool isConnected () => _isConnect;
+  
 }
 
-class DEFS {
+class ZKCMD {
   static const startTag = [0x50, 0x50, 0x82, 0x7D];
 
-  static const cmdConnect = 0x03e8;
-  static const cmdEnableDevice = 0x03ea;
-  static const cmdData = 0x05dd;
+  static const connect = 0x03e8;          // 1000
+  static const disconnect = 0x03e9;       // 1101
+  static const auth = 0x044e;             // 1102
+  static const readConfig = 0x000b;       // 11
+  
+  static const cmdData = 0x05dd;          // 1501
   static const cmdPrepareData = 0x05dc;
-  static const cmdAckOk = 0x07d0;
   static const cmdDataRdy = 0x05e0;
   static const cmdFreeData = 0x05de;
   static const cmdReq2SendCmdKey = 0x044e;
-  static const cmdGetDeviceName = 0x000b;
   static const cmdRegEvent = 0x01f4;
-  static const cmdDisconnect = 0x03e9;
-  static const cmdAuth = 0x044e;
-  static const cmdReadConfig = 0x000b;
 
-  static const repNotAuth = 0x07d5;
-  static const repSuccess = 0x07d0;
+  static const repNotAuth = 0x07d5;       // 2005
+  static const repSuccess = 0x07d0;       // 2000
 
   static const testVoice = 1017;
   static const efAlarm = (1<<9);
