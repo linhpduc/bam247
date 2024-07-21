@@ -334,8 +334,8 @@ class _FaQScreenState extends State<FaQScreen> {
                         itemCount: filteredSources.length,
                         itemBuilder: (BuildContext context, int index) {
                           return SourceItem(
-                            info: filteredSources[index], 
-                            dbConn: widget.dbConn, 
+                            info: filteredSources[index],
+                            dbConn: widget.dbConn,
                             handleUpdateParentWidget: refreshSource,
                           );
                         },

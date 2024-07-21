@@ -1,5 +1,7 @@
 import 'package:batt247/components.dart';
 import 'package:batt247/constants.dart';
+import 'package:batt247/core/components/dropdown/dropdown_menu.dart';
+import 'package:batt247/main.dart';
 import 'package:batt247/models/machines.dart';
 import 'package:batt247/models/sources.dart';
 // import 'package:batt247/screens/sources/page%20copy.dart';
@@ -8,14 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
+
 class PageSourceController {
   String selectedValue = SourceTypeModel.values[0].code;
-  List<DropdownMenuEntry<String>> options =
+  List<BaseOptionDropdown> options =
       List.generate(SourceTypeModel.values.length, (index) {
-    return DropdownMenuEntry<String>(
-      value: SourceTypeModel.values[index].code,
-      label: SourceTypeModel.values[index].name,
-    );
+    return BaseOptionDropdown(
+        value: SourceTypeModel.values[index].code,
+        label: SourceTypeModel.values[index].name,
+        data: SourceTypeModel.values[index]);
   }).toList();
 
   Future<void> dialogNewSource(BuildContext context,
@@ -263,10 +266,27 @@ class PageSourceController {
   Future<void> onCreate(
     SourceModel newSource,
     MachineModel newMachine,
-  )  {
+  ) {
     if (newSource.typeCode == SourceTypeModel.machine) {
       AppDB.instance.createMachine(newMachine.toMap());
     }
     return AppDB.instance.createSource(newSource.toMap());
+  }
+
+  Future<void>? onRemove(SourceModel? source) {
+    if (source!.sourceId.isEmpty) return null;
+    AppDB.instance.deleteSource(source.sourceId);
+    switch (source.typeCode) {
+      case SourceTypeModel.machine:
+        AppDB.instance.deleteMachine(source.sourceId);
+        ScaffoldMessenger.of(globalContext!).showSnackBar(const SnackBar(
+          content: Text("Removed"),
+          width: 400.0,
+          behavior: SnackBarBehavior.floating,
+        ));
+        break;
+      default:
+    }
+    return null;
   }
 }

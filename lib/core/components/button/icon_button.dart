@@ -22,21 +22,25 @@ class IconButtonComp extends StatelessWidget {
   Widget build(BuildContext context) {
     var brightness = MediaQuery.of(context).platformBrightness;
     bool isDarkMode = brightness == Brightness.dark;
-    return IconButton(
-      onPressed: onPress,
-      icon: Icon(
-        icon,
-        size: size,
-        color: color,
+    return SizedBox(
+      height: 38,
+      child: IconButton(
+        onPressed: onPress,
+        icon: Icon(
+          icon,
+          size: size,
+          color: color,
+        ),
+        splashColor: splashColor,
+        highlightColor: highLightColor,
+        splashRadius: splashRadius,
+        style: ButtonStyle(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    side: const BorderSide(
+                        color: ColorResource.second_primary)))),
       ),
-      splashColor: splashColor,
-      highlightColor: highLightColor,
-      splashRadius: splashRadius,
-      style: ButtonStyle(
-          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                  side: const BorderSide(color: ColorResource.second_primary)))),
     );
   }
 }

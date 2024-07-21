@@ -23,6 +23,7 @@ dependencies:
   syncfusion_flutter_datagrid: ^26.1.42
   flutter_svg: ^2.0.10+1
   syncfusion_flutter_core: ^26.1.42
+  dropdown_button2: ^2.3.9
 dev_dependencies:
   flutter_test:
     sdk: flutter

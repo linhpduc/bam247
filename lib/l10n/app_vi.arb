@@ -11,5 +11,8 @@
 	"status": "trạng thái",
 	"copy_right": "Bản quyền thuộc về Base.vn",
 	"connected": "Đã kết nối",
-	"dis_connected": "Tạm dừng"
+	"dis_connected": "Tạm dừng",
+	"resync": "Đồng bộ lại",
+	"edit": "Chỉnh Sửa",
+	"delete": "Xóa"
 }
