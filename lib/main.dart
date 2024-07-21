@@ -6,6 +6,11 @@ import 'constants.dart';
 import 'screens/home.dart';
 import 'utils/database.dart';
 
+BuildContext? buildContext;
+AppLocalizations tr() {
+  return AppLocalizations.of(buildContext!)!;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const App());
@@ -25,10 +30,12 @@ class _AppState extends State<App> {
   AppDB dbConnection = AppDB.instance;
 
   bool get useLightMode => switch (themeMode) {
-    ThemeMode.system => View.of(context).platformDispatcher.platformBrightness == Brightness.light,
-    ThemeMode.light => true,
-    ThemeMode.dark => false
-  };
+        ThemeMode.system =>
+          View.of(context).platformDispatcher.platformBrightness ==
+              Brightness.light,
+        ThemeMode.light => true,
+        ThemeMode.dark => false
+      };
 
   @override
   void dispose() {
@@ -82,6 +89,10 @@ class _AppState extends State<App> {
         handleColorSelect: handleColorSelect,
         dbConnection: dbConnection,
       ),
+      onGenerateTitle: (context) {
+        buildContext = context;
+        return 'BAM247';
+      },
     );
   }
 }

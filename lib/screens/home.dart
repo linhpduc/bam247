@@ -87,7 +87,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     ScreenSelected.home => const HomeScreen(),
     ScreenSelected.sources => SourceScreen(dbConn: widget.dbConnection),
     ScreenSelected.records => const RecordScreen(),
-    ScreenSelected.helps => const FaqScreen(),
+    ScreenSelected.helps => FaQScreen(dbConn: widget.dbConnection),
   };
 
   Widget _trailingActions() => Column(
