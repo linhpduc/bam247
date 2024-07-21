@@ -1,6 +1,8 @@
 import 'package:batt247/components.dart';
+import 'package:batt247/core/components/dropdown/dropdown_menu.dart';
 import 'package:batt247/core/components/index.dart';
 import 'package:batt247/main.dart';
+import 'package:batt247/models/sources.dart';
 import 'package:batt247/screens/sources/page_controller.dart';
 import 'package:batt247/utils/database.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +20,8 @@ class DataSourcesTab extends StatefulWidget {
 class _DataSourcesTabState extends State<DataSourcesTab> {
   final PageSourceController _controller = PageSourceController();
   final DataGridController dataGridController = DataGridController();
-
-  late DataSource sources = DataSource(sources: []);
+  List<SourceModel> data = [];
+  late DataSource sources = DataSource(sources: [], originData: []);
   bool isLoading = true;
   List<DataGridRow> rows = [];
 
@@ -35,18 +37,9 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
     });
 
     try {
-      final data = await widget.dbConn.readAllSource();
+      data = await widget.dbConn.readAllSource();
       setState(() {
-        final dataRows = data.map<DataGridRow>((item) {
-          return DataGridRow(cells: [
-            DataGridCell(columnName: item.name, value: item.name),
-            DataGridCell(columnName: item.sourceId, value: item.typeCode),
-            DataGridCell(columnName: item.sourceId, value: item.sourceId),
-            DataGridCell(columnName: 'status', value: item.name == '1'),
-            const DataGridCell(columnName: 'actions', value: ''),
-          ]);
-        }).toList();
-        sources = DataSource(sources: dataRows);
+        sources = mapSourcesToDataSource(data);
       });
     } catch (e) {
       // Handle errors
@@ -56,6 +49,54 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> onFilter(String keyword) async {
+    print('search: ${keyword}');
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      List<SourceModel> currentData = [];
+      if (keyword.isEmpty) {
+        currentData = data;
+      } else {
+        currentData = data
+            .where((item) =>
+                item.name.toLowerCase().contains(keyword.toLowerCase()))
+            .toList();
+      }
+      setState(() {
+        sources = mapSourcesToDataSource(currentData);
+      });
+    } catch (e) {
+      // Handle errors
+      print('Error filter data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  DataSource mapSourcesToDataSource(List<SourceModel> data) {
+    final dataRows = data.map<DataGridRow>((item) {
+      return DataGridRow(cells: [
+        DataGridCell(columnName: item.name, value: item.name),
+        DataGridCell(columnName: item.sourceId, value: item.typeCode),
+        DataGridCell(columnName: item.sourceId, value: item.sourceId),
+        DataGridCell(columnName: 'status', value: item.name == '1'),
+        const DataGridCell(columnName: 'actions', value: ''),
+      ]);
+    }).toList();
+    return DataSource(
+      sources: dataRows,
+      originData: data,
+      onEdit: (id) {},
+      onRemove: (id) {},
+      onResync: (id) {},
+    );
   }
 
   @override
@@ -71,17 +112,19 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
           divider,
           Row(
             children: <Widget>[
-              const SizedBox(
+              SizedBox(
                 width: 300,
-                height: 40,
-                child: SearchTextField(),
+                child: SearchTextField(
+                  callbackSearch: onFilter,
+                ),
               ),
               const SizedBox(width: 20),
               SizedBox(
-                child: DropdownComp(
-                  selectedValue: _controller.selectedValue,
+                width: 230,
+                child: DropdownMenuComp(
+                  placeholder: "Select an option",
                   items: _controller.options,
-                  onSelected: (newValue) {},
+                  selectedValue: _controller.selectedValue,
                 ),
               ),
               Expanded(child: Container()),
@@ -178,12 +221,44 @@ final columns = <GridColumn>[
   ),
 ];
 
+enum ActionMenu { resync, edit, delete }
+
 class DataSource extends DataGridSource {
-  DataSource({required List<DataGridRow> sources}) {
+  DataSource({
+    required List<DataGridRow> sources,
+    this.onEdit,
+    this.onRemove,
+    this.onResync,
+    required this.originData,
+  }) {
     _sources = sources;
   }
-
+  void Function(SourceModel source)? onEdit;
+  void Function(SourceModel source)? onRemove;
+  void Function(SourceModel source)? onResync;
+  List<SourceModel> originData = [];
   List<DataGridRow> _sources = [];
+
+  List<Map<String, dynamic>> actions = [
+    {
+      'action': ActionMenu.resync,
+      'label': tr().resync,
+      'icon': Icons.sync,
+      'color': Colors.white,
+    },
+    {
+      'action': ActionMenu.edit,
+      'label': tr().edit,
+      'icon': Icons.edit,
+      'color': Colors.white,
+    },
+    {
+      'action': ActionMenu.delete,
+      'label': tr().delete,
+      'icon': Icons.delete,
+      'color': Colors.redAccent,
+    },
+  ];
 
   @override
   List<DataGridRow> get rows => _sources;
@@ -194,17 +269,28 @@ class DataSource extends DataGridSource {
         cells: row.getCells().map<Widget>((e) {
       if (e.columnName == 'actions') {
         return Center(
-          child: PopupMenuButton<String>(
+          child: PopupMenuButton<ActionMenu>(
             position: PopupMenuPosition.under,
             onSelected: (value) {
               // Handle the selected action here
-              print('Selected action: $value');
+              if (value == ActionMenu.resync) {
+                print('resyncing...');
+              } else if (value == ActionMenu.edit) {
+                print('editing...');
+              } else if (value == ActionMenu.delete) {
+                print('deleting...');
+              }
             },
             itemBuilder: (BuildContext context) {
-              return <String>['Edit', 'Delete', 'Details'].map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
+              return actions.map((Map<String, dynamic> choice) {
+                return PopupMenuItem<ActionMenu>(
+                  value: choice["action"] as ActionMenu,
+                  child: ListTile(
+                    iconColor: choice["color"],
+                    textColor: choice["color"],
+                    leading: Icon(choice["icon"]),
+                    title: Text(choice["label"]),
+                  ),
                 );
               }).toList();
             },

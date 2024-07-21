@@ -6,9 +6,9 @@ import 'constants.dart';
 import 'screens/home.dart';
 import 'utils/database.dart';
 
-BuildContext? buildContext;
+BuildContext? globalContext;
 AppLocalizations tr() {
-  return AppLocalizations.of(buildContext!)!;
+  return AppLocalizations.of(globalContext!)!;
 }
 
 void main() async {
@@ -90,7 +90,7 @@ class _AppState extends State<App> {
         dbConnection: dbConnection,
       ),
       onGenerateTitle: (context) {
-        buildContext = context;
+        globalContext = context;
         return 'BAM247';
       },
     );

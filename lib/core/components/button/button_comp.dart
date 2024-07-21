@@ -50,7 +50,8 @@ class ButtonComponent extends StatelessWidget {
             if (icon != null) const SizedBox(width: 5),
             Text(
               title ?? '',
-              style: style ?? const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+              textAlign: TextAlign.center,
             )
           ],
         ),
