@@ -3,10 +3,10 @@ import 'package:bloc/bloc.dart';
 import 'source_event.dart';
 import 'source_state.dart';
 
-class ProductBloc extends Bloc<SourceEvent, SourceState> {
+class SourceBloc extends Bloc<SourceEvent, SourceState> {
   final AppDB db;
 
-  ProductBloc(this.db) : super(SourceInitial());
+  SourceBloc(this.db) : super(SourceInitial());
 
   @override
   Stream<SourceState> mapEventToState(SourceEvent event) async* {
@@ -20,8 +20,8 @@ class ProductBloc extends Bloc<SourceEvent, SourceState> {
       }
     } else if (event is SelectSource) {
       try {
-        final product = await db.readSource(event.sourceId);
-        yield SourceSelected(product);
+        final Source = await db.readSource(event.sourceId);
+        yield SourceSelected(Source);
       } catch (e) {
         yield SourceError(e.toString());
       }

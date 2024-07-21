@@ -1,6 +1,15 @@
 {
 	"data_connect_sources": "Nguồn kết nối dữ liệu",
 	"data_sources": "Danh sách nguồn dữ liệu",
+	"data_source": "Nguồn dữ liệu",
 	"checkin_histories": "Lịch sử chấm công",
-	"filter_by_name": "Lọc theo tên"
+	"filter_by_name": "Lọc theo tên",
+	"search_checkin_id": "Tìm kiếm mã chấm công",
+	"add_data_source": "Thêm nguồn dữ liệu",
+	"name": "Tên hiện thị",
+	"ip_address": "Địa chỉ IP",
+	"status": "trạng thái",
+	"copy_right": "Bản quyền thuộc về Base.vn",
+	"connected": "Đã kết nối",
+	"dis_connected": "Tạm dừng"
 }
