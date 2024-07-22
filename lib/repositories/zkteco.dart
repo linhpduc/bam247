@@ -9,11 +9,8 @@ class ZK {
   String ip;
   int port;
   int password;
-  late int _counter;
 
-  ZK({required this.ip, this.port = 4370, this.password = 0}) {
-    _counter = 0;
-  }
+  ZK({required this.ip, this.port = 4370, this.password = 0});
 
   void __sendCommand(Socket socket, int command, int sessionID, int replyID, {Uint8List? data}) {
     ZKPacket pkt = ZKPacket(
@@ -23,7 +20,6 @@ class ZK {
       data: data ?? Uint8List(0),
     );
     print('Send: $pkt');
-    _counter++;
     socket.add(pkt.toBytes());
   }
 
@@ -81,42 +77,45 @@ class ZK {
     return kBytes;
   }
 
-  void getDeviceInfo() {
-    List<String> infos = <String>['~SerialNumber', '~Platform', '~MAC', '~ZKFaceVersion', '~ZKFPVersion', '~DeviceName'];
-    Socket.connect(ip, port, timeout: const Duration(seconds: 1)).then((socket) {
+  Future<void> getDeviceInfo() async {
+    List<String> keyInfos = <String>['~SerialNumber', '~Platform', '~MAC', '~ZKFaceVersion', '~ZKFPVersion', '~DeviceName'];
+    try {
+      final socket = await Socket.connect(ip, port, timeout: const Duration(seconds: 5));
       print("Connected: $ip:$port");
-      socket.listen(
-        (data) {
-          ZKPacket respkt = ZKPacket.fromBytes(data); 
-          print("Recv: $respkt");
-          switch (respkt.cmdCode) {
-            case ZKCMD.repNotAuth:
-              auth(socket, respkt.sessionID, respkt.replyID);
-              break;
-            case ZKCMD.repSuccess:
-              if (infos.isNotEmpty) {
-                String confName = infos.removeLast();
-                readInfo(socket, respkt.sessionID, respkt.replyID, confName);
-              } else {
-                disconnect(socket, respkt.sessionID, respkt.replyID);
-              }
-              break;
-            default:
-          }
-        },
-        onDone: () {
-          print('Done.');
-          socket.destroy();
-        },
-        onError: (error) {
-          print('Error: $error');
-          socket.destroy();
-        }
-      );
-      connect(socket);
-    });
-  }
 
+      socket.listen((data) {
+        ZKPacket respkt = ZKPacket.fromBytes(data); 
+        print("Recv: $respkt");
+        // String confName = keyInfos.removeLast();
+        // readInfo(socket, respkt.sessionID, respkt.replyID, confName);
+        // auth(socket, respkt.sessionID, respkt.replyID);
+        // connect(socket);
+        disconnect(socket, respkt.sessionID, respkt.replyID);
+        // socket.destroy();
+        // switch (respkt.cmdCode) {
+        //   case ZKCMD.repNotAuth:
+        //     auth(socket, respkt.sessionID, respkt.replyID);
+        //     break;
+        //   case ZKCMD.repSuccess:
+        //     if (keyInfos.isNotEmpty) {
+        //       String confName = keyInfos.removeLast();
+        //       // print(keyInfos);
+        //       readInfo(socket, respkt.sessionID, respkt.replyID, confName);
+        //     } else {
+        //       disconnect(socket, respkt.sessionID, respkt.replyID);
+        //     }
+        //     break;
+        //   default:
+        // }
+      });
+      connect(socket);
+      await Future.delayed(const Duration(seconds: 2));
+      await socket.flush();
+      socket.destroy();
+    } catch (e) {
+      throw Exception('conection_error');
+    }
+  }
 }
 
 class ZKPacket {
@@ -155,7 +154,8 @@ class ZKPacket {
       ...[replyID % (1<<8), replyID>>8],
       ...data,
     ]);
-    checksum = _calcCheckSum16([cmdCode, 0, sessionID, replyID, ...data]);
+    checksum = _calcCheckSum16([cmdCode, sessionID, replyID, ...data]);
+    print(checksum);
     packet.setRange(10, 12, Helper.packUShort(checksum));
     return packet;
   }
