@@ -14,5 +14,8 @@
 	"dis_connected": "Tạm dừng",
 	"resync": "Đồng bộ lại",
 	"edit": "Chỉnh Sửa",
-	"delete": "Xóa"
+	"delete": "Xóa",
+	"delete_success": "Xóa thành công",
+	"create_success": "Thêm thành công",
+	"comming_soon": "Comming soon..."
 }

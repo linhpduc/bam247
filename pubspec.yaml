@@ -18,12 +18,12 @@ dependencies:
     sdk: flutter
   intl: any
   bloc: ^8.1.4
-  flutter_bloc: ^8.1.6
   equatable: ^2.0.5
-  syncfusion_flutter_datagrid: ^26.1.42
+  flutter_bloc: ^8.1.6
   flutter_svg: ^2.0.10+1
-  syncfusion_flutter_core: ^26.1.42
   dropdown_button2: ^2.3.9
+  syncfusion_flutter_core: ^26.1.42
+  syncfusion_flutter_datagrid: ^26.1.42
 dev_dependencies:
   flutter_test:
     sdk: flutter

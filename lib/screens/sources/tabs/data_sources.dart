@@ -2,6 +2,7 @@ import 'package:batt247/components.dart';
 import 'package:batt247/core/components/dropdown/dropdown_menu.dart';
 import 'package:batt247/core/components/index.dart';
 import 'package:batt247/main.dart';
+import 'package:batt247/models/machines.dart';
 import 'package:batt247/models/sources.dart';
 import 'package:batt247/screens/sources/page_controller.dart';
 import 'package:batt247/utils/database.dart';
@@ -18,12 +19,12 @@ class DataSourcesTab extends StatefulWidget {
 }
 
 class _DataSourcesTabState extends State<DataSourcesTab> {
-  final PageSourceController _controller = PageSourceController();
+  late PageSourceController _controller;
   final DataGridController dataGridController = DataGridController();
-  List<SourceModel> data = [];
   late DataSource sources = DataSource(sources: [], originData: []);
   bool isLoading = true;
-  List<DataGridRow> rows = [];
+  List<SourceModel> data = [];
+  List<DataGridRow> rows = []; // for datagrid
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
     try {
       data = await widget.dbConn.readAllSource();
       setState(() {
-        sources = mapSourcesToDataSource(data);
+        sources = mapDataToDataSource(data);
       });
     } catch (e) {
       // Handle errors
@@ -68,7 +69,7 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
             .toList();
       }
       setState(() {
-        sources = mapSourcesToDataSource(currentData);
+        sources = mapDataToDataSource(currentData);
       });
     } catch (e) {
       // Handle errors
@@ -80,12 +81,20 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
     }
   }
 
-  DataSource mapSourcesToDataSource(List<SourceModel> data) {
+  void onCellTap(details) {
+    if (details.rowColumnIndex.rowIndex != 0) {
+          int selectedRowIndex = details.rowColumnIndex.rowIndex - 1;
+          var clickedItem = sources.effectiveRows.elementAt(selectedRowIndex);
+          print(clickedItem);
+    }
+  }
+
+  DataSource mapDataToDataSource(List<SourceModel> data) {
     final dataRows = data.map<DataGridRow>((item) {
       return DataGridRow(cells: [
-        DataGridCell(columnName: item.name, value: item.name),
-        DataGridCell(columnName: item.sourceId, value: item.typeCode),
-        DataGridCell(columnName: item.sourceId, value: item.sourceId),
+        DataGridCell(columnName: 'name', value: item.name),
+        DataGridCell(columnName: 'typeCode', value: item.typeCode.name),
+        DataGridCell(columnName: 'sourceId', value: item.sourceId),
         DataGridCell(columnName: 'status', value: item.name == '1'),
         const DataGridCell(columnName: 'actions', value: ''),
       ]);
@@ -93,14 +102,18 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
     return DataSource(
       sources: dataRows,
       originData: data,
-      onEdit: (id) {},
-      onRemove: (id) {},
-      onResync: (id) {},
+      onEdit: (source) {},
+      onRemove: (source) async {
+        _controller.onRemove(source);
+        _loadData();
+      },
+      onResync: (source) {},
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    _controller = PageSourceController(pageContext: context);
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,19 +142,18 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
               ),
               Expanded(child: Container()),
               ButtonComponent(
-                  onPressed: () => _controller
-                          .dialogNewSource(context,
-                              onCreate: _controller.onCreate)
-                          .then((_) {
-                        _loadData();
-                      }),
+                  onPressed:  () async {
+                      await _controller.dialogNewSource(context, onCreate: _controller.onCreate);
+                      _loadData();
+                  },
                   title: AppLocalizations.of(context)!.add_data_source,
                   icon: const Icon(Icons.add, color: Colors.white, size: 16)),
               const SizedBox(width: 5),
               IconButtonComp(
                 icon: Icons.settings_outlined,
                 onPress: () => null,
-                color: Colors.black,
+                borderColor: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -154,7 +166,7 @@ class _DataSourcesTabState extends State<DataSourcesTab> {
               isLoading: isLoading,
             ),
           ),
-          SizedBox(height: 20)
+          const SizedBox(height: 20)
         ],
       ),
     );
@@ -265,6 +277,8 @@ class DataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter buildRow(DataGridRow row) {
+    var itemId = row.getCells().firstWhere((cell) => cell.columnName == "sourceId").value as String;
+    var source = originData.firstWhere((item) => item.sourceId == itemId);
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((e) {
       if (e.columnName == 'actions') {
@@ -274,11 +288,11 @@ class DataSource extends DataGridSource {
             onSelected: (value) {
               // Handle the selected action here
               if (value == ActionMenu.resync) {
-                print('resyncing...');
+                  onResync!.call(source);
               } else if (value == ActionMenu.edit) {
-                print('editing...');
+                onEdit!.call(source);
               } else if (value == ActionMenu.delete) {
-                print('deleting...');
+                 onRemove!.call(source);
               }
             },
             itemBuilder: (BuildContext context) {

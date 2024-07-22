@@ -7,13 +7,16 @@ class SyncfusionDataGrid extends StatefulWidget {
   final DataGridSource sources;
   final DataGridController dataGridController;
   final bool isLoading;
+  final void Function(DataGridCellTapDetails details)? onCellTap;
 
   SyncfusionDataGrid(
       {Key? key,
       required this.columns,
       required this.sources,
       required this.dataGridController,
-      required this.isLoading})
+      required this.isLoading,
+      this.onCellTap,
+      })
       : super(key: key);
 
   @override
@@ -38,6 +41,7 @@ class _SyncfusionDataGridState extends State<SyncfusionDataGrid> {
             showCheckboxColumn: true,
             selectionMode: SelectionMode.multiple,
             columns: widget.columns,
+            onCellTap: widget.onCellTap,
           ),
         ),
         SfDataPagerTheme(

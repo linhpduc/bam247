@@ -6,6 +6,7 @@ import 'package:batt247/models/machines.dart';
 import 'package:batt247/models/sources.dart';
 // import 'package:batt247/screens/sources/page%20copy.dart';
 import 'package:batt247/utils/database.dart';
+import 'package:batt247/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,18 +14,19 @@ const uuid = Uuid();
 
 class PageSourceController {
   String selectedValue = SourceTypeModel.values[0].code;
-  List<BaseOptionDropdown> options =
-      List.generate(SourceTypeModel.values.length, (index) {
+  List<BaseOptionDropdown> options = List.generate(SourceTypeModel.values.length, (index) {
     return BaseOptionDropdown(
         value: SourceTypeModel.values[index].code,
         label: SourceTypeModel.values[index].name,
         data: SourceTypeModel.values[index]);
   }).toList();
+  late BuildContext pageContext;
 
-  Future<void> dialogNewSource(BuildContext context,
-      {required Future<void> Function(
-              SourceModel newSource, MachineModel newMachine)
-          onCreate}) {
+  PageSourceController({required this.pageContext});
+
+  Future<void> dialogNewSource(BuildContext context, {
+    required Future<void> Function(SourceModel newSource, MachineModel newMachine) onCreate,
+    }) {
     SourceModel newSource = SourceModel(
       sourceId: uuid.v7(),
       typeCode: SourceTypeModel.machine,
@@ -101,8 +103,7 @@ class PageSourceController {
                                 newSource.typeCode =
                                     SourceTypeModel.values.byName(code!);
                               },
-                              dropdownMenuEntries: List.generate(
-                                  SourceTypeModel.values.length, (index) {
+                              dropdownMenuEntries: List.generate(SourceTypeModel.values.length, (index) {
                                 return DropdownMenuEntry<String>(
                                     value: SourceTypeModel.values[index].code,
                                     label: SourceTypeModel.values[index].name);
@@ -112,8 +113,7 @@ class PageSourceController {
                             DropdownMenu<String>(
                               initialSelection: newMachine.brandname?.value,
                               onSelected: (String? value) {
-                                newMachine.brandname =
-                                    MachineBrandname.values.byName(value!);
+                                newMachine.brandname = MachineBrandname.values.byName(value!);
                               },
                               dropdownMenuEntries: List.generate(
                                   MachineBrandname.values.length, (index) {
@@ -251,11 +251,6 @@ class PageSourceController {
 
                   onCreate(newSource, newMachine);
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Create successfully"),
-                    width: 400.0,
-                    behavior: SnackBarBehavior.floating,
-                  ));
                 },
               ),
             ],
@@ -266,11 +261,12 @@ class PageSourceController {
   Future<void> onCreate(
     SourceModel newSource,
     MachineModel newMachine,
-  ) {
+  ) async {
     if (newSource.typeCode == SourceTypeModel.machine) {
       AppDB.instance.createMachine(newMachine.toMap());
     }
-    return AppDB.instance.createSource(newSource.toMap());
+    AppDB.instance.createSource(newSource.toMap());
+    ToastMessage.show(Text(tr().create_success), pageContext);
   }
 
   Future<void>? onRemove(SourceModel? source) {
@@ -279,11 +275,7 @@ class PageSourceController {
     switch (source.typeCode) {
       case SourceTypeModel.machine:
         AppDB.instance.deleteMachine(source.sourceId);
-        ScaffoldMessenger.of(globalContext!).showSnackBar(const SnackBar(
-          content: Text("Removed"),
-          width: 400.0,
-          behavior: SnackBarBehavior.floating,
-        ));
+       ToastMessage.show(Text(tr().delete_success), pageContext);
         break;
       default:
     }
