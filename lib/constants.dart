@@ -26,7 +26,7 @@ enum ScreenSelected {
 }
 
 enum SourceTypeModel {
-  machine("machine", "Attendance Machines");
+  machine("machine", "Attendance Machine");
 
   const SourceTypeModel(this.code, this.name);
   final String code;

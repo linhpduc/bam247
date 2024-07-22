@@ -60,7 +60,7 @@ class _AppState extends State<App> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'BAM247',
-      locale: const Locale('vi'), // Ngôn ngữ mặc định
+      locale: const Locale('en'), // Default language
       supportedLocales: const [
         Locale('en', ''), // English
         Locale('vi', ''), // Vietnamese

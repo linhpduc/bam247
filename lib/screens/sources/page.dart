@@ -58,7 +58,7 @@ class _SourceScreenState extends State<SourceScreen> with SingleTickerProviderSt
                     border: Border(
                       bottom: BorderSide(
                         color: ColorResource.primary, // Màu của đường viền
-                        width: 1.5, // Độ rộng của đường viền
+                        width: 1, // Độ rộng của đường viền
                       ),
                     ),
                   ),
